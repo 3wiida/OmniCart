@@ -3,10 +3,13 @@ package com.mahmoudibrahem.omnicart.data.repository
 import com.mahmoudibrahem.omnicart.core.util.Resource
 import com.mahmoudibrahem.omnicart.core.util.parseToErrorModel
 import com.mahmoudibrahem.omnicart.data.remote.OmniCartAPI
+import com.mahmoudibrahem.omnicart.domain.model.CartActionResponse
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.domain.model.HomeResponse
 import com.mahmoudibrahem.omnicart.domain.model.LoginResponse
+import com.mahmoudibrahem.omnicart.domain.model.ProductData
 import com.mahmoudibrahem.omnicart.domain.model.RegisterResponse
+import com.mahmoudibrahem.omnicart.domain.model.SingleProductInfo
 import com.mahmoudibrahem.omnicart.domain.repository.NetworkRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -84,6 +87,74 @@ class NetworkRepositoryImpl @Inject constructor(
             try {
                 val response = api.search(query = query)
                 emit(Resource.Success(data = response.data.products.map { it.toCommonProduct() }))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun getSingleProduct(id: String): Flow<Resource<ProductData>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getSingleProduct(id = id)
+                emit(Resource.Success(data = response.toProductData()))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun addToCart(productID: String): Flow<Resource<CartActionResponse>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.addProductToCart(productID = productID)
+                emit(Resource.Success(data = response.toCartActionResponse()))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun removeFromCart(productID: String): Flow<Resource<CartActionResponse>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.deleteFromCart(productID = productID)
+                emit(Resource.Success(data = response.toCartActionResponse()))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun upsertInWishlist(productID: String): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                api.upsertInWishlist(productID = productID)
+                emit(Resource.Success(data = Unit))
             } catch (e: HttpException) {
                 val error = e.parseToErrorModel()
                 emit(Resource.Failure(message = error.message))

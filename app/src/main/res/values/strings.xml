@@ -26,4 +26,11 @@
     <string name="cart">Cart</string>
     <string name="offer">Offer</string>
     <string name="profile">Profile</string>
+    <string name="specification">Specification</string>
+    <string name="overview">Overview</string>
+    <string name="reviews">Reviews</string>
+    <string name="you_might_also_like">You Might Also Like</string>
+    <string name="add_to_cart">Add To Cart</string>
+    <string name="product_information">Product Information</string>
+    <string name="remove_from_cart">Remove From Cart</string>
 </resources>

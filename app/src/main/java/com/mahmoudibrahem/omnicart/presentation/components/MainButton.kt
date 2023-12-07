@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -33,14 +34,16 @@ fun MainButton(
     padding: Dp = 16.dp,
     onClick: () -> Unit = {},
     isLoading: Boolean = false,
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
+    activeColor: Color = MaterialTheme.colorScheme.primary,
+    inactiveColor: Color = MaterialTheme.colorScheme.tertiary
 ) {
     Button(
         modifier = modifier,
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.tertiary
+            containerColor = activeColor,
+            disabledContainerColor = inactiveColor
         ),
         shape = RoundedCornerShape(cornerRadius),
         enabled = isEnabled

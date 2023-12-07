@@ -10,6 +10,7 @@ import com.mahmoudibrahem.omnicart.presentation.screens.auth.login.LoginScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.auth.register.RegisterScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.home.HomeScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.search_results.SearchResultsScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.single_product.SingleProductScreen
 
 @Composable
 fun AppNavigation(
@@ -21,6 +22,7 @@ fun AppNavigation(
         navController = navController,
         startDestination = startDestination
     ) {
+
         composable(route = AppScreens.Login.route) {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(route = AppScreens.Register.route) },
@@ -33,6 +35,7 @@ fun AppNavigation(
                 }
             )
         }
+
         composable(route = AppScreens.Register.route) {
             RegisterScreen(
                 onNavigateToLogin = { navController.navigate(route = AppScreens.Login.route) },
@@ -40,6 +43,7 @@ fun AppNavigation(
             )
 
         }
+
         composable(route = AppScreens.Home.route) {
             HomeScreen(
                 onNavigateToSearchResults = { query ->
@@ -49,9 +53,18 @@ fun AppNavigation(
                             query
                         )
                     )
+                },
+                onNavigateToSingleProduct = { productID ->
+                    navController.navigate(
+                        route = AppScreens.SingleProductInfo.route.replace(
+                            "{product_id}",
+                            productID
+                        )
+                    )
                 }
             )
         }
+
         composable(route = AppScreens.SearchResults.route) { navBackStackEntry ->
             val query = navBackStackEntry.arguments?.getCharSequence("query")
             if (query == null) {
@@ -61,7 +74,21 @@ fun AppNavigation(
                     startingQuery = query.toString()
                 )
             }
+        }
 
+        composable(route = AppScreens.SingleProductInfo.route) { navBackStackEntry ->
+            val productID = navBackStackEntry.arguments?.getCharSequence("product_id")
+            if (productID != null) {
+                SingleProductScreen(
+                    productID = productID.toString(),
+                    onBackClicked = {
+                        navController.popBackStack()
+                    },
+                    onSearchClicked = {
+                        navController.navigate(route = AppScreens.SearchResults.route)
+                    }
+                )
+            }
         }
     }
 }

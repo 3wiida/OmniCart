@@ -2,6 +2,7 @@ package com.mahmoudibrahem.omnicart.presentation.screens.home
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -30,10 +31,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -57,13 +60,18 @@ import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.presentation.components.BottomNavigationBar
 import com.mahmoudibrahem.omnicart.presentation.components.MainTextField
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
+import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
-    onNavigateToSearchResults: (String) -> Unit = {}
+    onNavigateToSearchResults: (String) -> Unit = {},
+    onNavigateToSingleProduct: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
@@ -74,7 +82,8 @@ fun HomeScreen(
             onSearchQueryChanged = viewModel::onSearchQueryChanged,
             onSearchResultClicked = onNavigateToSearchResults,
             onFavoriteClicked = {},
-            onNotificationClicked = {}
+            onNotificationClicked = {},
+            onProductClicked = onNavigateToSingleProduct
         )
     }
 }
@@ -85,7 +94,8 @@ private fun HomeScreenContent(
     onSearchQueryChanged: (String) -> Unit,
     onFavoriteClicked: () -> Unit,
     onNotificationClicked: () -> Unit,
-    onSearchResultClicked: (String) -> Unit
+    onSearchResultClicked: (String) -> Unit,
+    onProductClicked: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -148,7 +158,8 @@ private fun HomeScreenContent(
                         isLoading = uiState.isLoading,
                         categoriesList = uiState.categoryList,
                         freshSalesList = uiState.freshSalesList,
-                        topSalesList = uiState.topSalesList
+                        topSalesList = uiState.topSalesList,
+                        onProductClicked = onProductClicked
                     )
                 }
             }
@@ -204,7 +215,8 @@ private fun HomeScreenBody(
     isLoading: Boolean,
     categoriesList: List<Category>,
     freshSalesList: List<CommonProduct>,
-    topSalesList: List<CommonProduct>
+    topSalesList: List<CommonProduct>,
+    onProductClicked: (String) -> Unit
 ) {
     Column(
         Modifier
@@ -219,7 +231,8 @@ private fun HomeScreenBody(
         )
         FreshSalesSection(
             isLoading = isLoading,
-            freshSalesList = freshSalesList
+            freshSalesList = freshSalesList,
+            onProductClicked = onProductClicked
         )
         TopSalesSection(
             isLoading = isLoading,
@@ -257,8 +270,12 @@ private fun CategorySection(
             modifier = Modifier.fillMaxWidth()
         ) {
             //PlaceHolder
-            if (isLoading) {
-                items(count = 5) {
+            items(count = 5) {
+                AnimatedVisibility(
+                    visible = isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                ) {
                     Column(
                         modifier = Modifier.padding(end = 12.dp)
                     ) {
@@ -280,11 +297,26 @@ private fun CategorySection(
                         )
                     }
                 }
-            } else {
-                //actual content
-                items(count = categoriesList.size) { pos ->
+            }
+
+            //actual content
+            items(count = categoriesList.size) { pos ->
+                val itemAlpha = remember { Animatable(initialValue = 0f) }
+                LaunchedEffect(key1 = null) {
+                    itemAlpha.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 300)
+                    )
+                }
+                AnimatedVisibility(
+                    visible = !isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
                     Column(
-                        modifier = Modifier.padding(end = 12.dp),
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .graphicsLayer { alpha = itemAlpha.value },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(
@@ -312,6 +344,7 @@ private fun CategorySection(
                         )
                     }
                 }
+
             }
         }
     }
@@ -320,7 +353,8 @@ private fun CategorySection(
 @Composable
 private fun FreshSalesSection(
     isLoading: Boolean,
-    freshSalesList: List<CommonProduct>
+    freshSalesList: List<CommonProduct>,
+    onProductClicked: (String) -> Unit
 ) {
     Column {
         Row(
@@ -344,8 +378,12 @@ private fun FreshSalesSection(
             modifier = Modifier.fillMaxWidth()
         ) {
             //PlaceHolder
-            if (isLoading) {
-                items(count = 5) {
+            items(count = 5) {
+                AnimatedVisibility(
+                    visible = isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                ) {
                     Column(
                         modifier = Modifier.padding(end = 12.dp)
                     ) {
@@ -377,11 +415,26 @@ private fun FreshSalesSection(
                         )
                     }
                 }
-            } else {
-                items(count = freshSalesList.size) { pos ->
+            }
+
+            //actual Data
+            items(count = freshSalesList.size) { pos ->
+                val itemAlpha = remember { Animatable(initialValue = 0f) }
+                LaunchedEffect(key1 = null) {
+                    itemAlpha.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 300)
+                    )
+                }
+                AnimatedVisibility(
+                    visible = !isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
                     Column(
                         modifier = Modifier
                             .size(width = 156.dp, height = 230.dp)
+                            .graphicsLayer { alpha = itemAlpha.value }
                             .padding(end = 16.dp)
                             .clip(RoundedCornerShape(5.dp))
                             .border(
@@ -390,6 +443,12 @@ private fun FreshSalesSection(
                                 shape = RoundedCornerShape(5.dp)
                             )
                             .padding(16.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                onProductClicked(freshSalesList[pos].id)
+                            }
                     ) {
                         AsyncImage(
                             modifier = Modifier
@@ -452,6 +511,7 @@ private fun FreshSalesSection(
                     }
                 }
             }
+
         }
     }
 }
@@ -483,8 +543,12 @@ private fun TopSalesSection(
             modifier = Modifier.fillMaxWidth(),
         ) {
             //PlaceHolder
-            if (isLoading) {
-                items(count = 5) {
+            items(count = 5) {
+                AnimatedVisibility(
+                    visible = isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                ) {
                     Column(
                         modifier = Modifier.padding(end = 12.dp)
                     ) {
@@ -516,12 +580,25 @@ private fun TopSalesSection(
                         )
                     }
                 }
-            } else {
-                //actual content
-                items(count = topSalesList.size) { pos ->
+            }
+            //actual content
+            items(count = topSalesList.size) { pos ->
+                val itemAlpha = remember { Animatable(initialValue = 0f) }
+                LaunchedEffect(key1 = null) {
+                    itemAlpha.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 300)
+                    )
+                }
+                AnimatedVisibility(
+                    visible = !isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
                     Column(
                         modifier = Modifier
                             .size(width = 156.dp, height = 230.dp)
+                            .graphicsLayer { alpha = itemAlpha.value }
                             .padding(end = 16.dp)
                             .clip(RoundedCornerShape(5.dp))
                             .border(
@@ -530,6 +607,7 @@ private fun TopSalesSection(
                                 shape = RoundedCornerShape(5.dp)
                             )
                             .padding(16.dp)
+
                     ) {
                         AsyncImage(
                             modifier = Modifier
@@ -588,6 +666,7 @@ private fun TopSalesSection(
                                 }
                             }
                         }
+
 
                     }
                 }

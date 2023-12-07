@@ -27,7 +27,7 @@ data class SearchResponseDto(
             val slug: String,
             val updateDisTime: String,
             val updatedAt: String
-        ){
+        ) {
             fun toCommonProduct(): CommonProduct {
                 val image = if (this.images.isNotEmpty()) this.images.first() else ""
                 return CommonProduct(
@@ -35,7 +35,8 @@ data class SearchResponseDto(
                     price = this.price,
                     image = image,
                     discount = this.discount,
-                    disPercentage = this.disPercentage
+                    disPercentage = this.disPercentage,
+                    id = _id
                 )
             }
         }

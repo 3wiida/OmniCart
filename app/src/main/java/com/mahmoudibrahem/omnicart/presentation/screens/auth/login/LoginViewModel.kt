@@ -3,9 +3,13 @@ package com.mahmoudibrahem.omnicart.presentation.screens.auth.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mahmoudibrahem.omnicart.core.util.Constants.IS_LOGGED_IN_KEY
 import com.mahmoudibrahem.omnicart.core.util.Constants.TAG
+import com.mahmoudibrahem.omnicart.core.util.Constants.USER_TOKEN_KEY
+import com.mahmoudibrahem.omnicart.core.util.Constants.userToken
 import com.mahmoudibrahem.omnicart.core.util.onResponse
 import com.mahmoudibrahem.omnicart.domain.usecase.LoginUseCase
+import com.mahmoudibrahem.omnicart.domain.usecase.SaveInDataStoreUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val saveInDataStoreUseCase: SaveInDataStoreUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginScreenUIState())
@@ -37,7 +42,12 @@ class LoginViewModel @Inject constructor(
                 password = uiState.value.password
             ).onResponse(
                 onSuccess = { response ->
+                    viewModelScope.launch(Dispatchers.IO) {
+                        saveInDataStoreUseCase(key = USER_TOKEN_KEY, value = response!!.token)
+                        saveInDataStoreUseCase(key = IS_LOGGED_IN_KEY, value = true)
+                    }
                     _uiState.update { it.copy(isLoading = false, isLoginSuccessful = true) }
+                    userToken = response!!.token
                     Log.d(TAG, "onLoginButtonClicked: $response")
                 },
                 onFailure = { msg ->

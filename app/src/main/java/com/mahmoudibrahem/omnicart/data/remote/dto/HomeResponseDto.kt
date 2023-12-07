@@ -69,7 +69,8 @@ data class HomeResponseDto(
             image = image,
             price = price,
             discount = discount,
-            disPercentage = disPercentage
+            disPercentage = disPercentage,
+            id = _id
         )
     }
 
@@ -80,7 +81,8 @@ data class HomeResponseDto(
             image = image,
             price = price,
             discount = discount,
-            disPercentage = disPercentage
+            disPercentage = disPercentage,
+            id = _id
         )
     }
 }

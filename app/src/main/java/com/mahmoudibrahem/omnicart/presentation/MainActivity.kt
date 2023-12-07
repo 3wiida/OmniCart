@@ -4,29 +4,45 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.mahmoudibrahem.omnicart.core.navigation.AppNavigation
 import com.mahmoudibrahem.omnicart.core.navigation.AppScreens
-import com.mahmoudibrahem.omnicart.presentation.screens.auth.login.LoginScreen
-import com.mahmoudibrahem.omnicart.presentation.screens.home.HomeScreen
-import com.mahmoudibrahem.omnicart.presentation.screens.search_results.SearchResultsScreen
+import com.mahmoudibrahem.omnicart.core.util.Constants.isLoggedIn
 import com.mahmoudibrahem.omnicart.presentation.ui.theme.OmniCartTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val isKeepSplashScreen = MutableLiveData(true)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
+        delaySplashScreen(500)
+        installSplashScreen().setKeepOnScreenCondition {
+            isKeepSplashScreen.value ?: true
+        }
         setContent {
             val navController = rememberNavController()
+            val startDestination = if (isLoggedIn) AppScreens.Home.route else AppScreens.Login.route
             OmniCartTheme {
                 AppNavigation(
                     navController = navController,
-                    startDestination = AppScreens.Login.route,
+                    startDestination = startDestination,
                     host = this
                 )
             }
+        }
+    }
+
+    private fun delaySplashScreen(duration: Long) {
+        lifecycleScope.launch {
+            delay(duration)
+            isKeepSplashScreen.value = false
         }
     }
 }

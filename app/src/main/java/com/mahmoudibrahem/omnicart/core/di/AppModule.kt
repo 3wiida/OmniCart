@@ -1,10 +1,17 @@
 package com.mahmoudibrahem.omnicart.core.di
 
+import android.content.Context
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import com.mahmoudibrahem.omnicart.core.util.Constants
+import com.mahmoudibrahem.omnicart.core.util.Constants.APP_DATA_STORE_NAME
 import com.mahmoudibrahem.omnicart.data.remote.OmniCartAPI
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -12,6 +19,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+
+private val Context.appDataStore by preferencesDataStore(name = APP_DATA_STORE_NAME)
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,8 +38,7 @@ object AppModule {
             addInterceptor { chain ->
                 val newRequest = chain.request().newBuilder()
                 newRequest.addHeader("Accept", "application/json")
-                //TODO ADD TOKEN HERE
-                newRequest.addHeader("Authorization", "Bearer ")
+                newRequest.addHeader("Authorization", "Bearer ${Constants.userToken}")
                 chain.proceed(newRequest.build())
             }
             addInterceptor(httpClientLoggingInterceptor)
@@ -51,5 +59,11 @@ object AppModule {
             .create(OmniCartAPI::class.java)
     }
 
+
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return context.appDataStore
+    }
 
 }
