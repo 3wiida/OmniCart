@@ -1,6 +1,8 @@
 package com.mahmoudibrahem.omnicart.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -22,19 +25,36 @@ import com.mahmoudibrahem.omnicart.R
 
 @Composable
 fun BottomNavigationBar(
-    selectedItem: Int = 0
+    selectedItem: Int = 0,
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToExplore: () -> Unit = {},
+    onNavigateToCart: () -> Unit = {},
+    onNavigateToOffer: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .shadow(elevation = 30.dp,)
+            .shadow(elevation = 30.dp)
             .background(color = MaterialTheme.colorScheme.background),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
         for (i in 0..4) {
             Column(
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    when (i) {
+                        0 -> onNavigateToHome()
+                        1 -> onNavigateToExplore()
+                        2 -> onNavigateToCart()
+                        3 -> onNavigateToOffer()
+                        4 -> onNavigateToProfile()
+                    }
+                },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
@@ -49,7 +69,7 @@ fun BottomNavigationBar(
                         }
                     ),
                     contentDescription = "",
-                    tint = if (i == selectedItem) MaterialTheme.colorScheme.primary else Color.Unspecified
+                    tint = if (i == selectedItem) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(

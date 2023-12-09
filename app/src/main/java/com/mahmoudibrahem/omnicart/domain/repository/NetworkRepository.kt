@@ -35,4 +35,10 @@ interface NetworkRepository {
     suspend fun removeFromCart(productID: String): Flow<Resource<CartActionResponse>>
 
     suspend fun upsertInWishlist(productID: String): Flow<Resource<Unit>>
+
+    suspend fun sendReview(
+        productID: String,
+        review: String,
+        rating: Float
+    ): Flow<Resource<Unit>>
 }

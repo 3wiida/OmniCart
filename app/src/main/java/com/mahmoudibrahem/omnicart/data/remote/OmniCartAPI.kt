@@ -47,16 +47,23 @@ interface OmniCartAPI {
     @PUT("add-to-cart/{product_id}")
     suspend fun addProductToCart(
         @Path("product_id") productID: String
-    ):CartActionResponseDto
+    ): CartActionResponseDto
 
 
     @DELETE("remove-from-cart/{product_id}")
     suspend fun deleteFromCart(
-        @Path("product_id") productID:String
-    ):CartActionResponseDto
+        @Path("product_id") productID: String
+    ): CartActionResponseDto
 
     @POST("wishlist/{product_id}")
     suspend fun upsertInWishlist(
         @Path("product_id") productID: String
+    )
+
+    @POST("{product_id}/reviews/add-review")
+    suspend fun sendReview(
+        @Path("product_id") productID: String,
+        @Query("rating") rating: Float,
+        @Query("review") review: String
     )
 }

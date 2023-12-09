@@ -6,8 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.mahmoudibrahem.omnicart.core.util.Converters.fromReviewsJson
+import com.mahmoudibrahem.omnicart.presentation.screens.all_reviews.AllReviewsScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.auth.login.LoginScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.auth.register.RegisterScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.explore.ExploreScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.home.HomeScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.search_results.SearchResultsScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.single_product.SingleProductScreen
@@ -61,6 +64,9 @@ fun AppNavigation(
                             productID
                         )
                     )
+                },
+                onNavigateToExplore = {
+                    navController.navigate(route = AppScreens.Explore.route)
                 }
             )
         }
@@ -86,9 +92,36 @@ fun AppNavigation(
                     },
                     onSearchClicked = {
                         navController.navigate(route = AppScreens.SearchResults.route)
+                    },
+                    onNavigateToAllReviews = { reviewsJson ->
+                        navController.navigate(
+                            route = AppScreens.AllReviews.route.replace(
+                                "{reviews}",
+                                reviewsJson
+                            )
+                        )
                     }
                 )
             }
+        }
+
+        composable(route = AppScreens.AllReviews.route) { navBackStackEntry ->
+            val reviewsListJson = navBackStackEntry.arguments?.getString("reviews")
+            if (reviewsListJson != null) {
+                val reviewsList = reviewsListJson.fromReviewsJson()
+                AllReviewsScreen(
+                    reviews = reviewsList,
+                    onBackPressed = { navController.popBackStack() }
+                )
+            }
+        }
+
+        composable(route = AppScreens.Explore.route) {
+            ExploreScreen(
+                onNavigateToHome = {
+                    navController.navigate(route = AppScreens.Home.route)
+                }
+            )
         }
     }
 }

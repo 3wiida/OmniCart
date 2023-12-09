@@ -30,6 +30,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,8 +48,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -60,6 +64,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.mahmoudibrahem.omnicart.R
+import com.mahmoudibrahem.omnicart.core.util.Converters.toReviewsJson
 import com.mahmoudibrahem.omnicart.core.util.ifNull
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.domain.model.Review
@@ -76,6 +81,7 @@ fun SingleProductScreen(
     productID: String = "",
     onSearchClicked: () -> Unit = {},
     onBackClicked: () -> Unit = {},
+    onNavigateToAllReviews: (String) -> Unit ={}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     SingleProductScreenContent(
@@ -85,7 +91,8 @@ fun SingleProductScreen(
         onLoveClicked = viewModel::onLoveClicked,
         onProductClicked = viewModel::getProductData,
         onAddToCartClicked = viewModel::onAddToCartClicked,
-        onDeleteBtnClicked = viewModel::onDeleteFromCartClicked
+        onDeleteBtnClicked = viewModel::onDeleteFromCartClicked,
+        onSeeAllReviewsClicked = { onNavigateToAllReviews(uiState.productData.productInfo.reviews.toReviewsJson()) }
     )
     DisposableEffect(key1 = owner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -108,7 +115,8 @@ private fun SingleProductScreenContent(
     onLoveClicked: () -> Unit,
     onProductClicked: (String) -> Unit,
     onAddToCartClicked: () -> Unit,
-    onDeleteBtnClicked: () -> Unit
+    onDeleteBtnClicked: () -> Unit,
+    onSeeAllReviewsClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -151,7 +159,8 @@ private fun SingleProductScreenContent(
                         recommendedProducts = uiState.productData.recommendedProducts,
                         onProductClicked = onProductClicked,
                         onAddToCartClicked = onAddToCartClicked,
-                        onDeleteBtnClicked = onDeleteBtnClicked
+                        onDeleteBtnClicked = onDeleteBtnClicked,
+                        onSeeAllReviewsClicked = onSeeAllReviewsClicked
                     )
                 }
             }
@@ -246,7 +255,8 @@ private fun ProductSpecSection(
     onProductClicked: (String) -> Unit,
     onLoveClicked: () -> Unit,
     onAddToCartClicked: () -> Unit,
-    onDeleteBtnClicked: () -> Unit
+    onDeleteBtnClicked: () -> Unit,
+    onSeeAllReviewsClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -363,10 +373,14 @@ private fun ProductSpecSection(
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.labelMedium
                 )
-                Text(
-                    text = stringResource(R.string.see_more),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelMedium
+                ClickableText(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                            append(stringResource(R.string.see_more))
+                        }
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    onClick = { onSeeAllReviewsClicked() }
                 )
             }
             SingleReviewSection(
@@ -607,7 +621,7 @@ private fun LoadingSection() {
         Spacer(modifier = Modifier.height(8.dp))
 
         //spec details
-        for(i in 0..5){
+        for (i in 0..5) {
             Spacer(
                 modifier = Modifier
                     .size(

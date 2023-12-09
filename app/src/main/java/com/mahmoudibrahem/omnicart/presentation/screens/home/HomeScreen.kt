@@ -71,11 +71,17 @@ import androidx.compose.runtime.LaunchedEffect
 fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
     onNavigateToSearchResults: (String) -> Unit = {},
-    onNavigateToSingleProduct: (String) -> Unit = {}
+    onNavigateToSingleProduct: (String) -> Unit = {},
+    onNavigateToExplore: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
-        bottomBar = { BottomNavigationBar() }
+        bottomBar = {
+            BottomNavigationBar(
+                selectedItem = 0,
+                onNavigateToExplore = onNavigateToExplore
+            )
+        }
     ) {
         HomeScreenContent(
             uiState = uiState,
@@ -113,7 +119,6 @@ private fun HomeScreenContent(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             ) {

@@ -6,4 +6,6 @@ object ScreenRoutes {
     const val HOME_SCREEN_ROUTE = "HOME_SCREEN_ROUTE"
     const val SEARCH_RESULTS_SCREEN_ROUTE = "SEARCH_RESULTS_SCREEN_ROUTE/{query}"
     const val SINGLE_PRODUCT_INFO_ROUTE = "SINGLE_PRODUCT_INFO_ROUTE/{product_id}"
+    const val ALL_REVIEWS_SCREEN_ROUTE = "ALL_REVIEWS_SCREEN_ROUTE/{reviews}"
+    const val EXPLORE_SCREEN_ROUTE = "EXPLORE_SCREEN_ROUTE/{categories}"
 }

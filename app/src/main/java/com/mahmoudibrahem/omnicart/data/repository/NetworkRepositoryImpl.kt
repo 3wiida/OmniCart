@@ -165,4 +165,29 @@ class NetworkRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun sendReview(
+        productID: String,
+        review: String,
+        rating: Float
+    ): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                api.sendReview(
+                    productID = productID,
+                    review = review,
+                    rating = rating
+                )
+                emit(Resource.Success(data = Unit))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
 }

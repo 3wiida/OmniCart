@@ -2,6 +2,7 @@ package com.mahmoudibrahem.omnicart.core.util
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.mahmoudibrahem.omnicart.domain.model.Category
 
 object Constants {
 
@@ -17,5 +18,6 @@ object Constants {
     //Runtime Util Constants
     var isLoggedIn = false
     var userToken = ""
+    var categories: List<Category> = emptyList()
 
 }

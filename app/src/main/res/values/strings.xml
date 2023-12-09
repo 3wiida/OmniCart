@@ -33,4 +33,8 @@
     <string name="add_to_cart">Add To Cart</string>
     <string name="product_information">Product Information</string>
     <string name="remove_from_cart">Remove From Cart</string>
+    <string name="all_reviews">All Reviews</string>
+    <string name="write_review">Write Review</string>
+    <string name="send">Send</string>
+    <string name="please_write_overall_level_of_satisfaction_with_your_shipping_delivery_service">Please write Overall level of satisfaction with your shipping / Delivery Service</string>
 </resources>

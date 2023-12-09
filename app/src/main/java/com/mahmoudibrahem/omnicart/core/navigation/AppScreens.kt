@@ -1,5 +1,7 @@
 package com.mahmoudibrahem.omnicart.core.navigation
 
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ALL_REVIEWS_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.EXPLORE_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.HOME_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.LOGIN_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SEARCH_RESULTS_SCREEN_ROUTE
@@ -12,4 +14,6 @@ sealed class AppScreens(val route: String) {
     object Home : AppScreens(route = HOME_SCREEN_ROUTE)
     object SearchResults : AppScreens(route = SEARCH_RESULTS_SCREEN_ROUTE)
     object SingleProductInfo : AppScreens(route = SINGLE_PRODUCT_INFO_ROUTE)
+    object AllReviews : AppScreens(route = ALL_REVIEWS_SCREEN_ROUTE)
+    object Explore : AppScreens(route = EXPLORE_SCREEN_ROUTE)
 }
