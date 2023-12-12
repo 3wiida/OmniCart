@@ -72,14 +72,17 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
     onNavigateToSearchResults: (String) -> Unit = {},
     onNavigateToSingleProduct: (String) -> Unit = {},
-    onNavigateToExplore: () -> Unit = {}
+    onNavigateToExplore: () -> Unit = {},
+    onNavigateToCart: () -> Unit = {},
+    onNavigateToAllCategories: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
                 selectedItem = 0,
-                onNavigateToExplore = onNavigateToExplore
+                onNavigateToExplore = onNavigateToExplore,
+                onNavigateToCart = onNavigateToCart
             )
         }
     ) {
@@ -89,7 +92,8 @@ fun HomeScreen(
             onSearchResultClicked = onNavigateToSearchResults,
             onFavoriteClicked = {},
             onNotificationClicked = {},
-            onProductClicked = onNavigateToSingleProduct
+            onProductClicked = onNavigateToSingleProduct,
+            onSeeAllCategoriesClicked = onNavigateToAllCategories
         )
     }
 }
@@ -101,7 +105,8 @@ private fun HomeScreenContent(
     onFavoriteClicked: () -> Unit,
     onNotificationClicked: () -> Unit,
     onSearchResultClicked: (String) -> Unit,
-    onProductClicked: (String) -> Unit
+    onProductClicked: (String) -> Unit,
+    onSeeAllCategoriesClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -119,33 +124,10 @@ private fun HomeScreenContent(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            LazyColumn(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-            ) {
-                items(count = uiState.searchResultsList.size) { pos ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.search_icon),
-                            contentDescription = "",
-                            tint = Color.Unspecified
-                        )
-                        ClickableText(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp, bottom = 8.dp, start = 8.dp),
-                            text = buildAnnotatedString {
-                                withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                    append(uiState.searchResultsList[pos])
-                                }
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            onClick = { onSearchResultClicked(uiState.searchResultsList[pos]) }
-                        )
-                    }
-                }
-            }
+            SearchResultSection(
+                results = uiState.searchResultsList,
+                onSearchResultClicked = onSearchResultClicked
+            )
         }
 
         AnimatedVisibility(
@@ -164,12 +146,51 @@ private fun HomeScreenContent(
                         categoriesList = uiState.categoryList,
                         freshSalesList = uiState.freshSalesList,
                         topSalesList = uiState.topSalesList,
-                        onProductClicked = onProductClicked
+                        onProductClicked = onProductClicked,
+                        onSeeAllCategoriesClicked = onSeeAllCategoriesClicked
                     )
                 }
             }
         }
 
+    }
+}
+
+@Composable
+private fun SearchResultSection(
+    results: List<String>,
+    onSearchResultClicked: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        items(count = results.size) { pos ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.search_icon),
+                    contentDescription = "",
+                    tint = Color.Unspecified
+                )
+                ClickableText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 8.dp, start = 8.dp),
+                    text = buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        ) {
+                            append(results[pos])
+                        }
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    onClick = {
+                        onSearchResultClicked(results[pos])
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -221,7 +242,8 @@ private fun HomeScreenBody(
     categoriesList: List<Category>,
     freshSalesList: List<CommonProduct>,
     topSalesList: List<CommonProduct>,
-    onProductClicked: (String) -> Unit
+    onProductClicked: (String) -> Unit,
+    onSeeAllCategoriesClicked: () -> Unit
 ) {
     Column(
         Modifier
@@ -231,7 +253,7 @@ private fun HomeScreenBody(
         CategorySection(
             isLoading = isLoading,
             categoriesList = categoriesList,
-            onSeeAllClicked = { },
+            onSeeAllClicked = onSeeAllCategoriesClicked,
             onCategoryClicked = { }
         )
         FreshSalesSection(
@@ -266,6 +288,12 @@ private fun CategorySection(
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                  onSeeAllClicked()
+                },
                 text = stringResource(R.string.more_categories),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium
@@ -310,7 +338,7 @@ private fun CategorySection(
                 LaunchedEffect(key1 = null) {
                     itemAlpha.animateTo(
                         targetValue = 1f,
-                        animationSpec = tween(durationMillis = 300)
+                        animationSpec = tween(durationMillis = 200)
                     )
                 }
                 AnimatedVisibility(
@@ -320,8 +348,7 @@ private fun CategorySection(
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(end = 12.dp)
-                            .graphicsLayer { alpha = itemAlpha.value },
+                            .padding(end = 12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(
@@ -428,7 +455,7 @@ private fun FreshSalesSection(
                 LaunchedEffect(key1 = null) {
                     itemAlpha.animateTo(
                         targetValue = 1f,
-                        animationSpec = tween(durationMillis = 300)
+                        animationSpec = tween(durationMillis = 200)
                     )
                 }
                 AnimatedVisibility(
@@ -592,7 +619,7 @@ private fun TopSalesSection(
                 LaunchedEffect(key1 = null) {
                     itemAlpha.animateTo(
                         targetValue = 1f,
-                        animationSpec = tween(durationMillis = 300)
+                        animationSpec = tween(durationMillis = 200)
                     )
                 }
                 AnimatedVisibility(

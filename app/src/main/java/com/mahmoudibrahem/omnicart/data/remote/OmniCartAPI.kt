@@ -1,11 +1,12 @@
 package com.mahmoudibrahem.omnicart.data.remote
 
-import com.mahmoudibrahem.omnicart.data.remote.dto.CartActionResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.CartResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.HomeResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.LoginResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.ProductInfoDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.RegisterResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.SearchResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.UserAddressResponseDto
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -47,13 +48,13 @@ interface OmniCartAPI {
     @PUT("add-to-cart/{product_id}")
     suspend fun addProductToCart(
         @Path("product_id") productID: String
-    ): CartActionResponseDto
+    )
 
 
     @DELETE("remove-from-cart/{product_id}")
     suspend fun deleteFromCart(
         @Path("product_id") productID: String
-    ): CartActionResponseDto
+    )
 
     @POST("wishlist/{product_id}")
     suspend fun upsertInWishlist(
@@ -66,4 +67,26 @@ interface OmniCartAPI {
         @Query("rating") rating: Float,
         @Query("review") review: String
     )
+
+    @GET("my-cart")
+    suspend fun getMyCart(): CartResponseDto
+
+    @PUT("decrease-quantity/{product_id}")
+    suspend fun decreaseQuantityOfItem(
+        @Path("product_id") productID: String
+    )
+
+    @POST("address")
+    suspend fun addAddress(
+        @Query("name") addressName:String,
+        @Query("country") country:String,
+        @Query("city") city:String,
+        @Query("street") addressLine1:String,
+        @Query("street2") addressLine2:String,
+        @Query("zipcode") zipCode:String,
+        @Query("phoneNumber") phoneNumber:String,
+    )
+
+    @GET("user-address")
+    suspend fun getUserAddress(): UserAddressResponseDto
 }

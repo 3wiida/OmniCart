@@ -5,14 +5,14 @@ import com.google.gson.reflect.TypeToken
 import com.mahmoudibrahem.omnicart.domain.model.Review
 
 object Converters {
-    fun String.fromReviewsJson(): List<Review> {
+    fun String.toReviewList(): List<Review> {
         return Gson().fromJson(
             this,
             object : TypeToken<ArrayList<Review>>() {}.type
         )
     }
 
-    fun List<Review>.toReviewsJson(): String {
+    fun List<Review>.toReviewJson(): String {
         return Gson().toJson(
             this,
             object : TypeToken<ArrayList<Review>>() {}.type

@@ -53,14 +53,16 @@ fun ExploreScreen(
     onCategoryClicked: (String) -> Unit = {},
     onNavigateToFav: () -> Unit = {},
     onNavigateToHome: () -> Unit = {},
-    onNavigateToSearchResults: (String) -> Unit = {}
+    onNavigateToSearchResults: (String) -> Unit = {},
+    onNavigateToCart: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
                 selectedItem = 1,
-                onNavigateToHome = onNavigateToHome
+                onNavigateToHome = onNavigateToHome,
+                onNavigateToCart = onNavigateToCart
             )
         }
     ) {

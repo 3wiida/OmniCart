@@ -60,7 +60,7 @@ fun SearchResultsScreen(
         onSortClicked = {},
         onFilterClicked = {}
     )
-    LaunchedEffect(key1 = startingQuery){
+    LaunchedEffect(key1 = startingQuery) {
         viewModel.setInitialStartingQuery(startingQuery)
     }
 }
@@ -159,117 +159,129 @@ private fun ResultsSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (isLoading) {
-                items(count = 5) {
-                    Column(
-                        modifier = Modifier.padding(end = 12.dp)
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(230.dp)
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Spacer(
-                            modifier = Modifier
-                                .size(
-                                    width = 140.dp,
-                                    height = 15.dp
-                                )
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Spacer(
-                            modifier = Modifier
-                                .size(
-                                    width = 70.dp,
-                                    height = 15.dp
-                                )
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                items(count = 3) {
+                    LoadingState()
                 }
             } else {
                 items(count = results.size) { pos ->
-                    Column(
-                        modifier = Modifier
-                            .size(width = 156.dp, height = 230.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .padding(16.dp),
+                    SingleProductItem(product = results[pos])
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Column(
+        modifier = Modifier.padding(end = 12.dp)
+    ) {
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(230.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(brush = shimmerBrush())
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(
+            modifier = Modifier
+                .size(
+                    width = 140.dp,
+                    height = 15.dp
+                )
+                .clip(RoundedCornerShape(5.dp))
+                .background(brush = shimmerBrush())
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(
+            modifier = Modifier
+                .size(
+                    width = 70.dp,
+                    height = 15.dp
+                )
+                .clip(RoundedCornerShape(5.dp))
+                .background(brush = shimmerBrush())
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+fun SingleProductItem(
+    product: CommonProduct
+) {
+    Column(
+        modifier = Modifier
+            .size(width = 156.dp, height = 230.dp)
+            .clip(RoundedCornerShape(5.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .padding(16.dp),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(RoundedCornerShape(5.dp)),
+                model = Constants.IMAGE_URL + product.image,
+                contentDescription = "",
+                placeholder = painterResource(id = R.drawable.product_image_placeholder),
+                error = painterResource(id = R.drawable.image_error),
+                contentScale = ContentScale.FillBounds,
+                imageLoader = ImageLoader
+                    .Builder(LocalContext.current)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .respectCacheHeaders(false)
+                    .networkCachePolicy(CachePolicy.ENABLED)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build()
+            )
+        }
+        Text(
+            modifier = Modifier.padding(top = 4.dp),
+            text = product.name,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.labelSmall,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2
+        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Column {
+                Text(
+                    modifier = Modifier.padding(top = 4.dp),
+                    text = if (product.discount == 0) product.price.toString() + "$" else product.discount.toString() + "$",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (product.discount != 0) {
+                    Row(
+                        modifier = Modifier.padding(top = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.TopCenter
-                        ) {
-                            AsyncImage(
-                                modifier = Modifier
-                                    .size(110.dp)
-                                    .clip(RoundedCornerShape(5.dp)),
-                                model = Constants.IMAGE_URL + results[pos].image,
-                                contentDescription = "",
-                                placeholder = painterResource(id = R.drawable.product_image_placeholder),
-                                error = painterResource(id = R.drawable.image_error),
-                                contentScale = ContentScale.FillBounds,
-                                imageLoader = ImageLoader
-                                    .Builder(LocalContext.current)
-                                    .memoryCachePolicy(CachePolicy.ENABLED)
-                                    .respectCacheHeaders(false)
-                                    .networkCachePolicy(CachePolicy.ENABLED)
-                                    .diskCachePolicy(CachePolicy.ENABLED)
-                                    .build()
-                            )
-                        }
                         Text(
-                            modifier = Modifier.padding(top = 4.dp),
-                            text = results[pos].name,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.labelSmall,
+                            text = product.price.toString() + "$",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.titleSmall,
                             overflow = TextOverflow.Ellipsis,
-                            maxLines = 2
+                            textDecoration = TextDecoration.LineThrough
                         )
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.BottomStart
-                        ) {
-                            Column {
-                                Text(
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    text = if (results[pos].discount == 0) results[pos].price.toString() + "$" else results[pos].discount.toString() + "$",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                if (results[pos].discount != 0) {
-                                    Row(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = results[pos].price.toString() + "$",
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            overflow = TextOverflow.Ellipsis,
-                                            textDecoration = TextDecoration.LineThrough
-                                        )
-                                        Text(
-                                            text = "  " + results[pos].disPercentage.toString() + "% Off",
-                                            color = MaterialTheme.colorScheme.secondary,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        Text(
+                            text = "  " + product.disPercentage.toString() + "% Off",
+                            color = MaterialTheme.colorScheme.secondary,
+                            style = MaterialTheme.typography.labelSmall,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }

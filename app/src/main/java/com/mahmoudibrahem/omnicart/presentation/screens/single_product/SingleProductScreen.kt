@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
@@ -58,13 +57,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.mahmoudibrahem.omnicart.R
-import com.mahmoudibrahem.omnicart.core.util.Converters.toReviewsJson
+import com.mahmoudibrahem.omnicart.core.util.Converters.toReviewJson
 import com.mahmoudibrahem.omnicart.core.util.ifNull
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.domain.model.Review
@@ -92,7 +87,7 @@ fun SingleProductScreen(
         onProductClicked = viewModel::getProductData,
         onAddToCartClicked = viewModel::onAddToCartClicked,
         onDeleteBtnClicked = viewModel::onDeleteFromCartClicked,
-        onSeeAllReviewsClicked = { onNavigateToAllReviews(uiState.productData.productInfo.reviews.toReviewsJson()) }
+        onSeeAllReviewsClicked = { onNavigateToAllReviews(uiState.productData.productInfo.reviews.toReviewJson()) }
     )
     DisposableEffect(key1 = owner) {
         val observer = LifecycleEventObserver { _, event ->
