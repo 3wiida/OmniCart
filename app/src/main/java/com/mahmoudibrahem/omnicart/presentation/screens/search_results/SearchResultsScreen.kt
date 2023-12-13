@@ -1,7 +1,13 @@
 package com.mahmoudibrahem.omnicart.presentation.screens.search_results
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,13 +30,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -39,26 +44,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import coil.request.CachePolicy
 import com.mahmoudibrahem.omnicart.R
-import com.mahmoudibrahem.omnicart.core.util.Constants
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.presentation.components.MainTextField
+import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
 
 @Composable
 fun SearchResultsScreen(
     viewModel: SearchResultsViewModel = hiltViewModel(),
-    startingQuery: String = ""
+    startingQuery: String = "",
+    onNavigateToSingleProduct: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     SearchResultsScreenContent(
         uiState = uiState,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
         onSortClicked = {},
-        onFilterClicked = {}
+        onFilterClicked = {},
+        onProductClicked = onNavigateToSingleProduct
     )
     LaunchedEffect(key1 = startingQuery) {
         viewModel.setInitialStartingQuery(startingQuery)
@@ -70,7 +74,8 @@ private fun SearchResultsScreenContent(
     uiState: SearchResultsUIState,
     onSearchQueryChanged: (String) -> Unit,
     onSortClicked: () -> Unit,
-    onFilterClicked: () -> Unit
+    onFilterClicked: () -> Unit,
+    onProductClicked: (String) -> Unit
 ) {
     Column(
         Modifier
@@ -89,7 +94,23 @@ private fun SearchResultsScreenContent(
                 .height(1.dp),
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
-        ResultsSection(results = uiState.resultsList, isLoading = uiState.isLoading)
+        AnimatedVisibility(
+            visible = uiState.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut(animationSpec = tween(durationMillis = 500))
+        ) {
+            LoadingState()
+        }
+        AnimatedVisibility(
+            visible = !uiState.isLoading,
+            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+            exit = fadeOut()
+        ) {
+            ResultsSection(
+                results = uiState.resultsList,
+                onProductClicked = onProductClicked
+            )
+        }
     }
 }
 
@@ -139,7 +160,7 @@ private fun SearchResultsScreenHeader(
 @Composable
 private fun ResultsSection(
     results: List<CommonProduct>,
-    isLoading: Boolean
+    onProductClicked: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -158,14 +179,11 @@ private fun ResultsSection(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (isLoading) {
-                items(count = 3) {
-                    LoadingState()
-                }
-            } else {
-                items(count = results.size) { pos ->
-                    SingleProductItem(product = results[pos])
-                }
+            items(count = results.size) { pos ->
+                SingleProductItem(
+                    product = results[pos],
+                    onProductClicked = onProductClicked
+                )
             }
         }
     }
@@ -174,42 +192,64 @@ private fun ResultsSection(
 @Composable
 private fun LoadingState() {
     Column(
-        modifier = Modifier.padding(end = 12.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp)
     ) {
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(230.dp)
-                .clip(RoundedCornerShape(5.dp))
-                .background(brush = shimmerBrush())
+        Text(
+            modifier = Modifier.padding(bottom = 18.dp),
+            text = "0 Results",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelSmall
         )
-        Spacer(modifier = Modifier.height(10.dp))
-        Spacer(
-            modifier = Modifier
-                .size(
-                    width = 140.dp,
-                    height = 15.dp
-                )
-                .clip(RoundedCornerShape(5.dp))
-                .background(brush = shimmerBrush())
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Spacer(
-            modifier = Modifier
-                .size(
-                    width = 70.dp,
-                    height = 15.dp
-                )
-                .clip(RoundedCornerShape(5.dp))
-                .background(brush = shimmerBrush())
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        LazyVerticalGrid(
+            modifier = Modifier.fillMaxWidth(),
+            columns = GridCells.Fixed(2),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(count = 3) {
+                Column(
+                    modifier = Modifier.padding(end = 12.dp)
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(230.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(brush = shimmerBrush())
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .size(
+                                width = 140.dp,
+                                height = 15.dp
+                            )
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(brush = shimmerBrush())
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .size(
+                                width = 70.dp,
+                                height = 15.dp
+                            )
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(brush = shimmerBrush())
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun SingleProductItem(
-    product: CommonProduct
+private fun SingleProductItem(
+    product: CommonProduct,
+    onProductClicked: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -220,28 +260,24 @@ fun SingleProductItem(
                 color = MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(5.dp)
             )
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                onProductClicked(product.id)
+            },
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.TopCenter
         ) {
-            AsyncImage(
+            NetworkImage(
                 modifier = Modifier
                     .size(110.dp)
                     .clip(RoundedCornerShape(5.dp)),
-                model = Constants.IMAGE_URL + product.image,
-                contentDescription = "",
-                placeholder = painterResource(id = R.drawable.product_image_placeholder),
-                error = painterResource(id = R.drawable.image_error),
-                contentScale = ContentScale.FillBounds,
-                imageLoader = ImageLoader
-                    .Builder(LocalContext.current)
-                    .memoryCachePolicy(CachePolicy.ENABLED)
-                    .respectCacheHeaders(false)
-                    .networkCachePolicy(CachePolicy.ENABLED)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .build()
+                model = product.image,
+                contentScale = ContentScale.FillBounds
             )
         }
         Text(
@@ -259,12 +295,15 @@ fun SingleProductItem(
             Column {
                 Text(
                     modifier = Modifier.padding(top = 4.dp),
-                    text = if (product.discount == 0) product.price.toString() + "$" else product.discount.toString() + "$",
+                    text = if (product.discount == null)
+                        "${product.price}$"
+                    else
+                        "${product.discount}$",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelSmall,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (product.discount != 0) {
+                if (product.discount != null) {
                     Row(
                         modifier = Modifier.padding(top = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -277,7 +316,7 @@ fun SingleProductItem(
                             textDecoration = TextDecoration.LineThrough
                         )
                         Text(
-                            text = "  " + product.disPercentage.toString() + "% Off",
+                            text = "  ${product.disPercentage.toString()}% Off",
                             color = MaterialTheme.colorScheme.secondary,
                             style = MaterialTheme.typography.labelSmall,
                             overflow = TextOverflow.Ellipsis

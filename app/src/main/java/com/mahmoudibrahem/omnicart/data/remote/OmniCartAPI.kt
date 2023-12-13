@@ -7,6 +7,7 @@ import com.mahmoudibrahem.omnicart.data.remote.dto.ProductInfoDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.RegisterResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.SearchResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.UserAddressResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.WishlistResponseDto
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -78,15 +79,18 @@ interface OmniCartAPI {
 
     @POST("address")
     suspend fun addAddress(
-        @Query("name") addressName:String,
-        @Query("country") country:String,
-        @Query("city") city:String,
-        @Query("street") addressLine1:String,
-        @Query("street2") addressLine2:String,
-        @Query("zipcode") zipCode:String,
-        @Query("phoneNumber") phoneNumber:String,
+        @Query("name") addressName: String,
+        @Query("country") country: String,
+        @Query("city") city: String,
+        @Query("street") addressLine1: String,
+        @Query("street2") addressLine2: String,
+        @Query("zipcode") zipCode: String,
+        @Query("phoneNumber") phoneNumber: String,
     )
 
     @GET("user-address")
     suspend fun getUserAddress(): UserAddressResponseDto
+
+    @GET("My-wishlist")
+    suspend fun getWishlist(): WishlistResponseDto
 }

@@ -15,7 +15,7 @@ data class SearchResponseDto(
             val brand: String,
             val category: String,
             val disPercentage: Int,
-            val discount: Int,
+            val discount: Int?,
             val highligth: String,
             val id: String,
             val images: List<String>,

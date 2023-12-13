@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.mahmoudibrahem.omnicart.core.util.Converters.toReviewList
+import com.mahmoudibrahem.omnicart.presentation.screens.account.AccountScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.add_address.AddAddressScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.all_categories.AllCategoriesScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.all_reviews.AllReviewsScreen
@@ -13,6 +14,7 @@ import com.mahmoudibrahem.omnicart.presentation.screens.auth.login.LoginScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.auth.register.RegisterScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.cart.CartScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.explore.ExploreScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.favorites.FavoritesScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.home.HomeScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.search_results.SearchResultsScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.single_product.SingleProductScreen
@@ -69,13 +71,27 @@ fun AppNavigation(
                     )
                 },
                 onNavigateToExplore = {
-                    navController.navigate(route = AppScreens.Explore.route)
+                    navController.navigate(route = AppScreens.Explore.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
                 },
                 onNavigateToCart = {
-                    navController.navigate(route = AppScreens.Cart.route)
+                    navController.navigate(route = AppScreens.Cart.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
                 },
                 onNavigateToAllCategories = {
-                    navController.navigate(route = AppScreens.AllCategories.route)
+                    navController.navigate(route = AppScreens.AllCategories.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+                onNavigateToAccount = {
+                    navController.navigate(route = AppScreens.Account.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+                onNavigateToFavorites = {
+                    navController.navigate(route = AppScreens.Favorites.route)
                 }
             )
         }
@@ -83,10 +99,27 @@ fun AppNavigation(
         composable(route = AppScreens.SearchResults.route) { navBackStackEntry ->
             val query = navBackStackEntry.arguments?.getCharSequence("query")
             if (query == null) {
-                SearchResultsScreen()
+                SearchResultsScreen(
+                    onNavigateToSingleProduct = { productID ->
+                        navController.navigate(
+                            route = AppScreens.SingleProductInfo.route.replace(
+                                "{product_id}",
+                                productID
+                            )
+                        )
+                    }
+                )
             } else {
                 SearchResultsScreen(
-                    startingQuery = query.toString()
+                    startingQuery = query.toString(),
+                    onNavigateToSingleProduct = { productID ->
+                        navController.navigate(
+                            route = AppScreens.SingleProductInfo.route.replace(
+                                "{product_id}",
+                                productID
+                            )
+                        )
+                    }
                 )
             }
         }
@@ -128,10 +161,30 @@ fun AppNavigation(
         composable(route = AppScreens.Explore.route) {
             ExploreScreen(
                 onNavigateToHome = {
-                    navController.navigate(route = AppScreens.Home.route)
+                    navController.navigate(route = AppScreens.Home.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
                 },
                 onNavigateToCart = {
-                    navController.navigate(route = AppScreens.Cart.route)
+                    navController.navigate(route = AppScreens.Cart.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+                onNavigateToAccount = {
+                    navController.navigate(route = AppScreens.Account.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+                onNavigateToFav = {
+                    navController.navigate(route = AppScreens.Favorites.route)
+                },
+                onNavigateToSearchResults = { query ->
+                    navController.navigate(
+                        route = AppScreens.SearchResults.route.replace(
+                            "{query}",
+                            query
+                        )
+                    )
                 }
             )
         }
@@ -139,10 +192,19 @@ fun AppNavigation(
         composable(route = AppScreens.Cart.route) {
             CartScreen(
                 onNavigateToHome = {
-                    navController.navigate(route = AppScreens.Home.route)
+                    navController.navigate(route = AppScreens.Home.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
                 },
                 onNavigateToExplore = {
-                    navController.navigate(route = AppScreens.Explore.route)
+                    navController.navigate(route = AppScreens.Explore.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+                onNavigateToAccount = {
+                    navController.navigate(route = AppScreens.Account.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
                 },
                 onNavigateToAddress = {
                     navController.navigate(
@@ -175,6 +237,42 @@ fun AppNavigation(
         composable(route = AppScreens.AddAddress.route) {
             AddAddressScreen(
                 onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        composable(route = AppScreens.Account.route) {
+            AccountScreen(
+                onNavigateToHome = {
+                    navController.navigate(route = AppScreens.Home.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+                onNavigateToExplore = {
+                    navController.navigate(route = AppScreens.Explore.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+                onNavigateToCart = {
+                    navController.navigate(route = AppScreens.Cart.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                },
+            )
+        }
+
+        composable(route = AppScreens.Favorites.route) {
+            FavoritesScreen(
+                onNavigationBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToProduct = { productID ->
+                    navController.navigate(
+                        route = AppScreens.SingleProductInfo.route.replace(
+                            "{product_id}",
+                            productID
+                        )
+                    )
+                }
             )
         }
 

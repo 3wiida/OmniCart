@@ -63,4 +63,9 @@
     <string name="ex_01x_xxxx_xxx">Ex: 01x xxxx xxx</string>
     <string name="no_addresses_found">No Addresses Found</string>
     <string name="start_adding_you_address_to_ship_the_orders_to_you">Start adding you address to ship the orders to you</string>
+    <string name="account">Account</string>
+    <string name="order">Order</string>
+    <string name="favorites">Favorites</string>
+    <string name="you_don_t_have_items_in_your_favorites">You don\'t have items in your favorites</string>
+    <string name="items_marked_as_favorite_will_be_shown_here">Items marked as favorite will be shown here</string>
 </resources>

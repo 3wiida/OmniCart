@@ -70,7 +70,8 @@ fun CartScreen(
     viewModel: CartViewModel = hiltViewModel(),
     onNavigateToHome: () -> Unit = {},
     onNavigateToExplore: () -> Unit = {},
-    onNavigateToAddress: () -> Unit = {}
+    onNavigateToAddress: () -> Unit = {},
+    onNavigateToAccount: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
@@ -78,7 +79,8 @@ fun CartScreen(
             BottomNavigationBar(
                 selectedItem = 2,
                 onNavigateToHome = onNavigateToHome,
-                onNavigateToExplore = onNavigateToExplore
+                onNavigateToExplore = onNavigateToExplore,
+                onNavigateToAccount = onNavigateToAccount
             )
         }
     ) {

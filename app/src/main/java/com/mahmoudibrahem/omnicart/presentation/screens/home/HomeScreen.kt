@@ -37,8 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -50,11 +48,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import coil.request.CachePolicy
 import com.mahmoudibrahem.omnicart.R
-import com.mahmoudibrahem.omnicart.core.util.Constants.IMAGE_URL
 import com.mahmoudibrahem.omnicart.domain.model.Category
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.presentation.components.BottomNavigationBar
@@ -63,7 +57,10 @@ import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.layout.ContentScale
+import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -74,7 +71,10 @@ fun HomeScreen(
     onNavigateToSingleProduct: (String) -> Unit = {},
     onNavigateToExplore: () -> Unit = {},
     onNavigateToCart: () -> Unit = {},
-    onNavigateToAllCategories: () -> Unit = {}
+    onNavigateToAccount: () -> Unit = {},
+    onNavigateToAllCategories: () -> Unit = {},
+    onNavigateToSingleCategory: (String) -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
@@ -82,7 +82,8 @@ fun HomeScreen(
             BottomNavigationBar(
                 selectedItem = 0,
                 onNavigateToExplore = onNavigateToExplore,
-                onNavigateToCart = onNavigateToCart
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToAccount = onNavigateToAccount
             )
         }
     ) {
@@ -90,10 +91,10 @@ fun HomeScreen(
             uiState = uiState,
             onSearchQueryChanged = viewModel::onSearchQueryChanged,
             onSearchResultClicked = onNavigateToSearchResults,
-            onFavoriteClicked = {},
-            onNotificationClicked = {},
+            onFavoriteClicked = onNavigateToFavorites,
             onProductClicked = onNavigateToSingleProduct,
-            onSeeAllCategoriesClicked = onNavigateToAllCategories
+            onSeeAllCategoriesClicked = onNavigateToAllCategories,
+            onCategoryClicked = onNavigateToSingleCategory
         )
     }
 }
@@ -103,10 +104,10 @@ private fun HomeScreenContent(
     uiState: HomeScreenUIState,
     onSearchQueryChanged: (String) -> Unit,
     onFavoriteClicked: () -> Unit,
-    onNotificationClicked: () -> Unit,
     onSearchResultClicked: (String) -> Unit,
     onProductClicked: (String) -> Unit,
-    onSeeAllCategoriesClicked: () -> Unit
+    onSeeAllCategoriesClicked: () -> Unit,
+    onCategoryClicked: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -116,8 +117,7 @@ private fun HomeScreenContent(
         HomeScreenHeader(
             searchQuery = uiState.searchQuery,
             onSearchQueryChanged = onSearchQueryChanged,
-            onFavoriteClicked = onFavoriteClicked,
-            onNotificationClicked = onNotificationClicked
+            onFavoriteClicked = onFavoriteClicked
         )
         AnimatedVisibility(
             visible = uiState.searchQuery.isNotEmpty(),
@@ -147,12 +147,12 @@ private fun HomeScreenContent(
                         freshSalesList = uiState.freshSalesList,
                         topSalesList = uiState.topSalesList,
                         onProductClicked = onProductClicked,
-                        onSeeAllCategoriesClicked = onSeeAllCategoriesClicked
+                        onSeeAllCategoriesClicked = onSeeAllCategoriesClicked,
+                        onCategoryClicked = onCategoryClicked
                     )
                 }
             }
         }
-
     }
 }
 
@@ -198,8 +198,7 @@ private fun SearchResultSection(
 private fun HomeScreenHeader(
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
-    onFavoriteClicked: () -> Unit,
-    onNotificationClicked: () -> Unit
+    onFavoriteClicked: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -222,15 +221,8 @@ private fun HomeScreenHeader(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.fav_icon),
-                contentDescription = ""
-            )
-        }
-        IconButton(
-            onClick = onNotificationClicked
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.notification_icon),
-                contentDescription = ""
+                contentDescription = "",
+                tint = Color.Unspecified
             )
         }
     }
@@ -243,7 +235,8 @@ private fun HomeScreenBody(
     freshSalesList: List<CommonProduct>,
     topSalesList: List<CommonProduct>,
     onProductClicked: (String) -> Unit,
-    onSeeAllCategoriesClicked: () -> Unit
+    onSeeAllCategoriesClicked: () -> Unit,
+    onCategoryClicked: (String) -> Unit
 ) {
     Column(
         Modifier
@@ -254,7 +247,7 @@ private fun HomeScreenBody(
             isLoading = isLoading,
             categoriesList = categoriesList,
             onSeeAllClicked = onSeeAllCategoriesClicked,
-            onCategoryClicked = { }
+            onCategoryClicked = onCategoryClicked
         )
         FreshSalesSection(
             isLoading = isLoading,
@@ -263,7 +256,8 @@ private fun HomeScreenBody(
         )
         TopSalesSection(
             isLoading = isLoading,
-            topSalesList = topSalesList
+            topSalesList = topSalesList,
+            onProductClicked = onProductClicked
         )
     }
 }
@@ -271,7 +265,7 @@ private fun HomeScreenBody(
 @Composable
 private fun CategorySection(
     onSeeAllClicked: () -> Unit,
-    onCategoryClicked: () -> Unit,
+    onCategoryClicked: (String) -> Unit,
     isLoading: Boolean,
     categoriesList: List<Category>
 ) {
@@ -292,91 +286,37 @@ private fun CategorySection(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
-                  onSeeAllClicked()
+                    onSeeAllClicked()
                 },
                 text = stringResource(R.string.more_categories),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium
             )
         }
-        LazyRow(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            //PlaceHolder
-            items(count = 5) {
-                AnimatedVisibility(
-                    visible = isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 500))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(end = 12.dp)
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .size(70.dp)
-                                .clip(CircleShape)
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Spacer(
-                            modifier = Modifier
-                                .size(
-                                    width = 70.dp,
-                                    height = 15.dp
-                                )
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                    }
-                }
-            }
 
-            //actual content
-            items(count = categoriesList.size) { pos ->
-                val itemAlpha = remember { Animatable(initialValue = 0f) }
-                LaunchedEffect(key1 = null) {
-                    itemAlpha.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(durationMillis = 200)
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(),
+            exit = fadeOut(animationSpec = tween(durationMillis = 500))
+        ) {
+            CategoryLoadingState()
+        }
+
+        AnimatedVisibility(
+            visible = !isLoading,
+            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+            exit = fadeOut()
+        ) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(items = categoriesList) { item ->
+                    CategoryItem(
+                        category = item,
+                        onCategoryClicked = onCategoryClicked
                     )
                 }
-                AnimatedVisibility(
-                    visible = !isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(end = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(
-                            onClick = { /*TODO*/ },
-                            modifier = Modifier
-                                .size(70.dp)
-                                .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = CircleShape
-                                )
-                                .clip(CircleShape)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = categoriesList[pos].icon),
-                                contentDescription = "",
-                                tint = Color.Unspecified
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = categoriesList[pos].name,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                }
-
             }
         }
     }
@@ -406,144 +346,30 @@ private fun FreshSalesSection(
                 style = MaterialTheme.typography.labelMedium
             )
         }
-        LazyRow(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            //PlaceHolder
-            items(count = 5) {
-                AnimatedVisibility(
-                    visible = isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 500))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(end = 12.dp)
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .size(width = 140.dp, height = 230.dp)
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Spacer(
-                            modifier = Modifier
-                                .size(
-                                    width = 140.dp,
-                                    height = 15.dp
-                                )
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Spacer(
-                            modifier = Modifier
-                                .size(
-                                    width = 70.dp,
-                                    height = 15.dp
-                                )
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                    }
-                }
-            }
 
-            //actual Data
-            items(count = freshSalesList.size) { pos ->
-                val itemAlpha = remember { Animatable(initialValue = 0f) }
-                LaunchedEffect(key1 = null) {
-                    itemAlpha.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(durationMillis = 200)
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(),
+            exit = fadeOut(animationSpec = tween(durationMillis = 500))
+        ) {
+            ProductsLoadingState()
+        }
+
+        AnimatedVisibility(
+            visible = !isLoading,
+            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+            exit = fadeOut()
+        ) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(items = freshSalesList) { item ->
+                    ProductItem(
+                        product = item,
+                        onProductClicked = onProductClicked
                     )
                 }
-                AnimatedVisibility(
-                    visible = !isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .size(width = 156.dp, height = 230.dp)
-                            .graphicsLayer { alpha = itemAlpha.value }
-                            .padding(end = 16.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .padding(16.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                onProductClicked(freshSalesList[pos].id)
-                            }
-                    ) {
-                        AsyncImage(
-                            modifier = Modifier
-                                .size(110.dp)
-                                .clip(RoundedCornerShape(5.dp)),
-                            model = IMAGE_URL + freshSalesList[pos].image,
-                            contentDescription = "",
-                            placeholder = painterResource(id = R.drawable.product_image_placeholder),
-                            error = painterResource(id = R.drawable.image_error),
-                            contentScale = ContentScale.FillBounds,
-                            imageLoader = ImageLoader
-                                .Builder(LocalContext.current)
-                                .memoryCachePolicy(CachePolicy.ENABLED)
-                                .respectCacheHeaders(false)
-                                .networkCachePolicy(CachePolicy.ENABLED)
-                                .diskCachePolicy(CachePolicy.ENABLED)
-                                .build()
-                        )
-                        Text(
-                            modifier = Modifier.padding(top = 4.dp),
-                            text = freshSalesList[pos].name,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.labelSmall,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 2
-                        )
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.BottomStart
-                        ) {
-                            Column {
-                                Text(
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    text = freshSalesList[pos].discount.toString() + "$",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Row(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = freshSalesList[pos].price.toString() + "$",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        overflow = TextOverflow.Ellipsis,
-                                        textDecoration = TextDecoration.LineThrough
-                                    )
-                                    Text(
-                                        text = "  " + freshSalesList[pos].disPercentage.toString() + "% Off",
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-
-                    }
-                }
             }
-
         }
     }
 }
@@ -551,7 +377,8 @@ private fun FreshSalesSection(
 @Composable
 private fun TopSalesSection(
     isLoading: Boolean,
-    topSalesList: List<CommonProduct>
+    topSalesList: List<CommonProduct>,
+    onProductClicked: (String) -> Unit
 ) {
     Column {
         Row(
@@ -571,136 +398,227 @@ private fun TopSalesSection(
                 style = MaterialTheme.typography.labelMedium
             )
         }
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
+
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(),
+            exit = fadeOut(animationSpec = tween(durationMillis = 500))
         ) {
-            //PlaceHolder
-            items(count = 5) {
-                AnimatedVisibility(
-                    visible = isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 500))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(end = 12.dp)
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .size(width = 140.dp, height = 230.dp)
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Spacer(
-                            modifier = Modifier
-                                .size(
-                                    width = 140.dp,
-                                    height = 15.dp
-                                )
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Spacer(
-                            modifier = Modifier
-                                .size(
-                                    width = 70.dp,
-                                    height = 15.dp
-                                )
-                                .clip(RoundedCornerShape(5.dp))
-                                .background(brush = shimmerBrush())
-                        )
-                    }
-                }
-            }
-            //actual content
-            items(count = topSalesList.size) { pos ->
-                val itemAlpha = remember { Animatable(initialValue = 0f) }
-                LaunchedEffect(key1 = null) {
-                    itemAlpha.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(durationMillis = 200)
+            ProductsLoadingState()
+        }
+
+        AnimatedVisibility(
+            visible = !isLoading,
+            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+            exit = fadeOut()
+        ) {
+            LazyRow(
+                Modifier.fillMaxWidth()
+            ) {
+                items(items = topSalesList) { item ->
+                    ProductItem(
+                        product = item,
+                        onProductClicked = onProductClicked
                     )
                 }
-                AnimatedVisibility(
-                    visible = !isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut()
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryLoadingState() {
+    LazyRow(
+        Modifier.fillMaxWidth()
+    ) {
+        items(count = 5) {
+            Column(
+                modifier = Modifier.padding(end = 12.dp)
+            ) {
+                Spacer(
+                    modifier = Modifier
+                        .size(70.dp)
+                        .clip(CircleShape)
+                        .background(brush = shimmerBrush())
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(
+                    modifier = Modifier
+                        .size(
+                            width = 70.dp,
+                            height = 15.dp
+                        )
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(brush = shimmerBrush())
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryItem(
+    category: Category,
+    onCategoryClicked: (String) -> Unit
+) {
+    val itemAlpha = remember { Animatable(initialValue = 0f) }
+    LaunchedEffect(key1 = null) {
+        itemAlpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 200)
+        )
+    }
+    Column(
+        modifier = Modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                onCategoryClicked(category.name)
+            },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        IconButton(
+            onClick = {},
+            modifier = Modifier
+                .size(70.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = CircleShape
+                )
+                .clip(CircleShape)
+        ) {
+            Icon(
+                painter = painterResource(id = category.icon),
+                contentDescription = "",
+                tint = Color.Unspecified
+            )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = category.name,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleSmall
+        )
+    }
+}
+
+@Composable
+private fun ProductsLoadingState() {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(count = 5) {
+            Column(
+                modifier = Modifier.padding(end = 12.dp)
+            ) {
+                Spacer(
+                    modifier = Modifier
+                        .size(width = 140.dp, height = 230.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(brush = shimmerBrush())
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(
+                    modifier = Modifier
+                        .size(
+                            width = 140.dp,
+                            height = 15.dp
+                        )
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(brush = shimmerBrush())
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(
+                    modifier = Modifier
+                        .size(
+                            width = 70.dp,
+                            height = 15.dp
+                        )
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(brush = shimmerBrush())
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProductItem(
+    product: CommonProduct,
+    onProductClicked: (String) -> Unit
+) {
+    val itemAlpha = remember { Animatable(initialValue = 0f) }
+    LaunchedEffect(key1 = null) {
+        itemAlpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 200)
+        )
+    }
+    Column(
+        modifier = Modifier
+            .size(width = 156.dp, height = 230.dp)
+            .graphicsLayer { alpha = itemAlpha.value }
+            .padding(end = 16.dp)
+            .clip(RoundedCornerShape(5.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .padding(16.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                onProductClicked(product.id)
+            }
+    ) {
+        NetworkImage(
+            modifier = Modifier
+                .size(110.dp)
+                .clip(RoundedCornerShape(5.dp)),
+            model = product.image,
+            contentScale = ContentScale.FillBounds
+        )
+        Text(
+            modifier = Modifier.padding(top = 4.dp),
+            text = product.name,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.labelSmall,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2
+        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Column {
+                Text(
+                    modifier = Modifier.padding(top = 4.dp),
+                    text = product.discount.toString() + "$",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Row(
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .size(width = 156.dp, height = 230.dp)
-                            .graphicsLayer { alpha = itemAlpha.value }
-                            .padding(end = 16.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .padding(16.dp)
-
-                    ) {
-                        AsyncImage(
-                            modifier = Modifier
-                                .size(110.dp)
-                                .clip(RoundedCornerShape(5.dp)),
-                            model = IMAGE_URL + topSalesList[pos].image,
-                            contentDescription = "",
-                            placeholder = painterResource(id = R.drawable.product_image_placeholder),
-                            error = painterResource(id = R.drawable.image_error),
-                            contentScale = ContentScale.FillBounds,
-                            imageLoader = ImageLoader
-                                .Builder(LocalContext.current)
-                                .memoryCachePolicy(CachePolicy.ENABLED)
-                                .respectCacheHeaders(false)
-                                .networkCachePolicy(CachePolicy.ENABLED)
-                                .diskCachePolicy(CachePolicy.ENABLED)
-                                .build()
-                        )
-                        Text(
-                            modifier = Modifier.padding(top = 4.dp),
-                            text = topSalesList[pos].name,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.labelSmall,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 2
-                        )
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.BottomStart
-                        ) {
-                            Column {
-                                Text(
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    text = topSalesList[pos].discount.toString() + "$",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Row(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = topSalesList[pos].price.toString() + "$",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        overflow = TextOverflow.Ellipsis,
-                                        textDecoration = TextDecoration.LineThrough
-                                    )
-                                    Text(
-                                        text = "  " + topSalesList[pos].disPercentage.toString() + "% Off",
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-
-
-                    }
+                    Text(
+                        text = product.price.toString() + "$",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.titleSmall,
+                        overflow = TextOverflow.Ellipsis,
+                        textDecoration = TextDecoration.LineThrough
+                    )
+                    Text(
+                        text = "  " + product.disPercentage.toString() + "% Off",
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
@@ -712,4 +630,3 @@ private fun TopSalesSection(
 private fun HomeScreenPreview() {
     HomeScreen()
 }
-

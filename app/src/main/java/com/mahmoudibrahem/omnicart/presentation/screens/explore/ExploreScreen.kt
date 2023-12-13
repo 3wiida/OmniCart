@@ -54,7 +54,8 @@ fun ExploreScreen(
     onNavigateToFav: () -> Unit = {},
     onNavigateToHome: () -> Unit = {},
     onNavigateToSearchResults: (String) -> Unit = {},
-    onNavigateToCart: () -> Unit = {}
+    onNavigateToCart: () -> Unit = {},
+    onNavigateToAccount: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
@@ -62,7 +63,8 @@ fun ExploreScreen(
             BottomNavigationBar(
                 selectedItem = 1,
                 onNavigateToHome = onNavigateToHome,
-                onNavigateToCart = onNavigateToCart
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToAccount = onNavigateToAccount
             )
         }
     ) {
@@ -164,7 +166,8 @@ private fun ScreenHeader(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.fav_icon),
-                    contentDescription = ""
+                    contentDescription = "",
+                    tint = Color.Unspecified
                 )
             }
         }

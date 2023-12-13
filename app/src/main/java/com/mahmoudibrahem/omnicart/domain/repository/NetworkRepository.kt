@@ -58,4 +58,6 @@ interface NetworkRepository {
     ): Flow<Resource<Unit>>
 
     suspend fun getUserAddress(): Flow<Resource<List<UserAddress>>>
+
+    suspend fun getWishlist(): Flow<Resource<List<CommonProduct>>>
 }

@@ -30,7 +30,7 @@ fun BottomNavigationBar(
     onNavigateToExplore: () -> Unit = {},
     onNavigateToCart: () -> Unit = {},
     onNavigateToOffer: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToAccount: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -52,7 +52,7 @@ fun BottomNavigationBar(
                         1 -> onNavigateToExplore()
                         2 -> onNavigateToCart()
                         3 -> onNavigateToOffer()
-                        4 -> onNavigateToProfile()
+                        4 -> onNavigateToAccount()
                     }
                 },
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -78,7 +78,7 @@ fun BottomNavigationBar(
                         1 -> stringResource(R.string.explore)
                         2 -> stringResource(R.string.cart)
                         3 -> stringResource(R.string.offer)
-                        4 -> stringResource(R.string.profile)
+                        4 -> stringResource(R.string.account)
                         else -> ""
                     },
                     color = if (i == selectedItem) MaterialTheme.colorScheme.primary else Color.Unspecified,
