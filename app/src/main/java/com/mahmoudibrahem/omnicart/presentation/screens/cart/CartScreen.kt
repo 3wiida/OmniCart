@@ -149,7 +149,6 @@ private fun CartScreenContent(
                 LazyColumn(
                     Modifier
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 64.dp)
-                        .animateContentSize()
                 ) {
                     item {
                         ScreenBody(
@@ -472,180 +471,169 @@ private fun TotalPriceSection(
 
 @Composable
 private fun LoadingState() {
-    Column(
-        Modifier
+    LazyColumn(
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
-            Spacer(
+        items(count = 3) {
+            Row(
                 modifier = Modifier
-                    .size(84.dp)
-                    .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
-            )
-            Column(
-                Modifier.padding(start = 12.dp)
+                    .fillMaxWidth()
+                    .height(104.dp)
+                    .clip(RoundedCornerShape(5.dp))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.Top
             ) {
                 Spacer(
                     modifier = Modifier
-                        .width(150.dp)
-                        .height(10.dp)
+                        .size(84.dp)
                         .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Spacer(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(10.dp)
-                        .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
-                )
+                Column(
+                    Modifier.padding(start = 12.dp, top = 4.dp)
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .width(150.dp)
+                            .height(10.dp)
+                            .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .width(100.dp)
+                            .height(10.dp)
+                            .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
+                    )
+                }
             }
         }
-        Row(
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
-            Spacer(
-                modifier = Modifier
-                    .size(84.dp)
-                    .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
-            )
+        item {
             Column(
-                Modifier.padding(start = 12.dp)
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .width(150.dp)
-                        .height(10.dp)
-                        .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Spacer(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(10.dp)
-                        .background(brush = shimmerBrush(), shape = RoundedCornerShape(5.dp))
-                )
-            }
-        }
-        Column(
-            Modifier
-                .clip(RoundedCornerShape(5.dp))
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(5.dp)
-                )
-                .padding(16.dp),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 100.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 50.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 100.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 50.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 100.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 50.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-            }
-
-            Box(
                 Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(Color.Gray, shape = DottedShape(step = 10.dp))
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .clip(RoundedCornerShape(5.dp))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .padding(16.dp),
             ) {
-                Spacer(
+                Row(
                     modifier = Modifier
-                        .size(width = 100.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 50.dp, height = 10.dp)
-                        .background(
-                            brush = shimmerBrush(),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                )
-            }
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 100.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 50.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                }
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 100.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 50.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 100.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 50.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                }
+
+                Box(
+                    Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(Color.Gray, shape = DottedShape(step = 10.dp))
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 100.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 50.dp, height = 10.dp)
+                            .background(
+                                brush = shimmerBrush(),
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    )
+                }
+
+            }
         }
     }
 }

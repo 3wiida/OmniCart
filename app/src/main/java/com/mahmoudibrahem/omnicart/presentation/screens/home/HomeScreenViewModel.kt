@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mahmoudibrahem.omnicart.R
 import com.mahmoudibrahem.omnicart.core.util.Constants
+import com.mahmoudibrahem.omnicart.core.util.DateParser.parseDate
 import com.mahmoudibrahem.omnicart.core.util.onResponse
 import com.mahmoudibrahem.omnicart.domain.model.Category
 import com.mahmoudibrahem.omnicart.domain.usecase.GetHomeUseCase
@@ -51,6 +52,7 @@ class HomeScreenViewModel @Inject constructor(
                             errorMsg = null,
                             topSalesList = response!!.topSales.take(10),
                             freshSalesList = response.freshSales.take(10),
+                            recommended = response.recommended,
                             categoryList = categoryList
                         )
                     }

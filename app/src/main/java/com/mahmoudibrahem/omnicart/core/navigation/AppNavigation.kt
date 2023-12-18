@@ -16,8 +16,12 @@ import com.mahmoudibrahem.omnicart.presentation.screens.cart.CartScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.explore.ExploreScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.favorites.FavoritesScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.home.HomeScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.orders.OrdersScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.profile.ProfileScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.search_results.SearchResultsScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.single_order.SingleOrderScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.single_product.SingleProductScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.success_screen.SuccessScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.user_address.UserAddressScreen
 
 @Composable
@@ -230,7 +234,12 @@ fun AppNavigation(
             UserAddressScreen(
                 isFromCart = isFromCart,
                 onBackClicked = { navController.navigateUp() },
-                onNavigateToAddAddress = { navController.navigate(route = AppScreens.AddAddress.route) }
+                onNavigateToAddAddress = { navController.navigate(route = AppScreens.AddAddress.route) },
+                onNavigateToSuccessScreen = {
+                    navController.navigate(route = AppScreens.Success.route) {
+                        popUpTo(route = AppScreens.Home.route)
+                    }
+                }
             )
         }
 
@@ -257,6 +266,26 @@ fun AppNavigation(
                         popUpTo(route = AppScreens.Home.route)
                     }
                 },
+                onNavigateToAccountOption = { option ->
+                    when (option) {
+                        0 -> {
+                            navController.navigate(route = AppScreens.Profile.route)
+                        }
+
+                        1 -> {
+                            navController.navigate(route = AppScreens.Orders.route)
+                        }
+
+                        2 -> {
+                            navController.navigate(
+                                route = AppScreens.UserAddress.route.replace(
+                                    "{is_from_cart}",
+                                    "false"
+                                )
+                            )
+                        }
+                    }
+                }
             )
         }
 
@@ -276,5 +305,53 @@ fun AppNavigation(
             )
         }
 
+        composable(route = AppScreens.Success.route) {
+            SuccessScreen(
+                onNavigateToOrders = {
+                    navController.navigate(route = AppScreens.Orders.route) {
+                        popUpTo(AppScreens.Home.route)
+                    }
+                }
+            )
+        }
+
+        composable(route = AppScreens.Orders.route) {
+            OrdersScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToHome = { navController.navigate(route = AppScreens.Home.route) },
+                onNavigateToSingleOrder = { orderID ->
+                    navController.navigate(
+                        route = AppScreens.SingleOrder.route.replace(
+                            "{order_id}",
+                            orderID
+                        )
+                    )
+                }
+            )
+        }
+
+        composable(route = AppScreens.SingleOrder.route) { navBackStackEntry ->
+            val orderID = navBackStackEntry.arguments?.getString("order_id")
+            orderID?.let {
+                SingleOrderScreen(
+                    onBackClicked = { navController.navigateUp() },
+                    onNavigateToSingleProduct = { productID ->
+                        navController.navigate(
+                            route = AppScreens.SingleProductInfo.route.replace(
+                                "{product_id}",
+                                productID
+                            )
+                        )
+                    },
+                    orderID = it
+                )
+            }
+        }
+
+        composable(route = AppScreens.Profile.route) {
+            ProfileScreen(
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
     }
 }

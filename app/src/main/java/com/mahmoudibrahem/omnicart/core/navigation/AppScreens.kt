@@ -9,9 +9,13 @@ import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.EXPLORE_SCREEN_R
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.FAVORITES_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.HOME_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.LOGIN_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ORDERS_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.PROFILE_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SEARCH_RESULTS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SIGNUP_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SINGLE_ORDER_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SINGLE_PRODUCT_INFO_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SUCCESS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.USER_ADDRESS_SCREEN_ROUTE
 
 sealed class AppScreens(val route: String) {
@@ -28,4 +32,8 @@ sealed class AppScreens(val route: String) {
     object AddAddress : AppScreens(route = ADD_ADDRESS_SCREEN_ROUTE)
     object Account : AppScreens(route = ACCOUNT_SCREEN_ROUTE)
     object Favorites : AppScreens(route = FAVORITES_SCREEN_ROUTE)
+    object Success : AppScreens(route = SUCCESS_SCREEN_ROUTE)
+    object Orders : AppScreens(route = ORDERS_SCREEN_ROUTE)
+    object SingleOrder : AppScreens(route = SINGLE_ORDER_SCREEN_ROUTE)
+    object Profile : AppScreens(route = PROFILE_SCREEN_ROUTE)
 }

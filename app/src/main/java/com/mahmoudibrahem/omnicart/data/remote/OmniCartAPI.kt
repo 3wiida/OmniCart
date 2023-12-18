@@ -3,9 +3,12 @@ package com.mahmoudibrahem.omnicart.data.remote
 import com.mahmoudibrahem.omnicart.data.remote.dto.CartResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.HomeResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.LoginResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.MeResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.OrdersResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.ProductInfoDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.RegisterResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.SearchResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.SingleOrderResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.UserAddressResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.WishlistResponseDto
 import retrofit2.http.DELETE
@@ -93,4 +96,18 @@ interface OmniCartAPI {
 
     @GET("My-wishlist")
     suspend fun getWishlist(): WishlistResponseDto
+
+    @POST("add-order")
+    suspend fun completeOrder()
+
+    @GET("My-orders")
+    suspend fun getMyOrders(): OrdersResponseDto
+
+    @GET("order-detail/{order_id}")
+    suspend fun getSingleOrderDetails(
+        @Path("order_id") orderID: String
+    ): SingleOrderResponseDto
+
+    @GET("me")
+    suspend fun getMyInfo(): MeResponseDto
 }

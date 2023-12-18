@@ -39,7 +39,7 @@ fun AccountScreen(
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
-                selectedItem = 3,
+                selectedItem = 4,
                 onNavigateToHome = onNavigateToHome,
                 onNavigateToExplore = onNavigateToExplore,
                 onNavigateToCart = onNavigateToCart

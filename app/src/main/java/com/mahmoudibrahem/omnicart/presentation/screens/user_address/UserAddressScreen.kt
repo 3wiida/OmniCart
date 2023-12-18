@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -56,23 +57,30 @@ fun UserAddressScreen(
     isFromCart: Boolean = false,
     onBackClicked: () -> Unit = {},
     onNavigateToAddAddress: () -> Unit = {},
-    onNavigateToPayment: () -> Unit = {}
+    onNavigateToSuccessScreen: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     UserAddressScreenContent(
         uiState = uiState,
         isFromCart = isFromCart,
+        isButtonLoading = uiState.isButtonLoading,
         onAddressSelected = viewModel::onAddressSelected,
         onBackClicked = onBackClicked,
-        onButtonClicked = if (isFromCart) onNavigateToPayment else onNavigateToAddAddress,
+        onButtonClicked = if (isFromCart) viewModel::completeOrder else onNavigateToAddAddress,
         onAddAddressClicked = onNavigateToAddAddress
     )
+    LaunchedEffect(key1 = uiState.isOrderCompleted) {
+        if(uiState.isOrderCompleted){
+            onNavigateToSuccessScreen()
+        }
+    }
 }
 
 @Composable
 private fun UserAddressScreenContent(
     uiState: UserAddressScreenUIState,
     isFromCart: Boolean,
+    isButtonLoading: Boolean,
     onBackClicked: () -> Unit,
     onAddAddressClicked: () -> Unit = {},
     onAddressSelected: (Int) -> Unit,
@@ -134,10 +142,12 @@ private fun UserAddressScreenContent(
                             .height(56.dp)
                             .padding(horizontal = 16.dp),
                         text = if (isFromCart)
-                            stringResource(R.string.next)
+                            stringResource(R.string.order)
                         else
                             stringResource(id = R.string.add_address),
-                        onClick = onButtonClicked
+                        onClick = onButtonClicked,
+                        isLoading = isButtonLoading,
+                        isEnabled = !isButtonLoading
                     )
                 }
             }

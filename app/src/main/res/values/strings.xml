@@ -68,4 +68,27 @@
     <string name="favorites">Favorites</string>
     <string name="you_don_t_have_items_in_your_favorites">You don\'t have items in your favorites</string>
     <string name="items_marked_as_favorite_will_be_shown_here">Items marked as favorite will be shown here</string>
+    <string name="see_your_orders">See Your Orders</string>
+    <string name="thank_you_for_shopping_using_omni_cart">thank you for shopping using omni cart</string>
+    <string name="success">Success</string>
+    <string name="orders">Orders</string>
+    <string name="order_status">Order Status</string>
+    <string name="items">Items</string>
+    <string name="price">Price</string>
+    <string name="orders_you_made_will_be_shown_here">Orders you made will be shown here</string>
+    <string name="you_haven_t_made_any_order_yet">You haven\'t made any order yet</string>
+    <string name="order_details">Order Details</string>
+    <string name="products">Products</string>
+    <string name="shipping_details">Shipping Details</string>
+    <string name="order_date">Order Date</string>
+    <string name="shipping_company">Shipping Company</string>
+    <string name="pos_reggular">POS Reggular</string>
+    <string name="resi_id">Resi ID</string>
+    <string name="payment_details">Payment Details</string>
+    <string name="total_price">Total Price</string>
+    <string name="email">Email</string>
+    <string name="role">Role</string>
+    <string name="status">Status</string>
+    <string name="we_recommend_the_best_for_you">We recommend the best for you</string>
+    <string name="recommended_products">Recommended\nProducts</string>
 </resources>

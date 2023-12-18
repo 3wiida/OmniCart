@@ -10,5 +10,6 @@ data class HomeScreenUIState(
     val freshSalesList: List<CommonProduct> = mutableListOf(),
     val isLoading: Boolean = true,
     val errorMsg: String? = null,
-    val searchResultsList: List<String> = mutableListOf()
+    val searchResultsList: List<String> = mutableListOf(),
+    val recommended: List<CommonProduct> = emptyList()
 )

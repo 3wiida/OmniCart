@@ -55,9 +55,15 @@ import com.mahmoudibrahem.omnicart.presentation.components.BottomNavigationBar
 import com.mahmoudibrahem.omnicart.presentation.components.MainTextField
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.layout.ContentScale
 import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
@@ -146,6 +152,7 @@ private fun HomeScreenContent(
                         categoriesList = uiState.categoryList,
                         freshSalesList = uiState.freshSalesList,
                         topSalesList = uiState.topSalesList,
+                        recommendedProducts = uiState.recommended,
                         onProductClicked = onProductClicked,
                         onSeeAllCategoriesClicked = onSeeAllCategoriesClicked,
                         onCategoryClicked = onCategoryClicked
@@ -234,6 +241,7 @@ private fun HomeScreenBody(
     categoriesList: List<Category>,
     freshSalesList: List<CommonProduct>,
     topSalesList: List<CommonProduct>,
+    recommendedProducts: List<CommonProduct>,
     onProductClicked: (String) -> Unit,
     onSeeAllCategoriesClicked: () -> Unit,
     onCategoryClicked: (String) -> Unit
@@ -257,6 +265,10 @@ private fun HomeScreenBody(
         TopSalesSection(
             isLoading = isLoading,
             topSalesList = topSalesList,
+            onProductClicked = onProductClicked
+        )
+        RecommendedSection(
+            recommendedProducts = recommendedProducts,
             onProductClicked = onProductClicked
         )
     }
@@ -421,6 +433,59 @@ private fun TopSalesSection(
                         onProductClicked = onProductClicked
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecommendedSection(
+    recommendedProducts: List<CommonProduct>,
+    onProductClicked: (String) -> Unit
+) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(206.dp)
+                .clip(RoundedCornerShape(5.dp)),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(id = R.drawable.recommend_img),
+                contentDescription = "",
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                Modifier.padding(start = 24.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.recommended_products),
+                    color = MaterialTheme.colorScheme.surface,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Text(
+                    modifier = Modifier.padding(top = 16.dp),
+                    text = stringResource(R.string.we_recommend_the_best_for_you),
+                    color = MaterialTheme.colorScheme.surface,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(items = recommendedProducts) { product ->
+                ProductItem(
+                    product = product,
+                    onProductClicked = onProductClicked
+                )
             }
         }
     }

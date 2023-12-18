@@ -1,5 +1,6 @@
 package com.mahmoudibrahem.omnicart.data.repository
 
+import android.util.Log
 import com.mahmoudibrahem.omnicart.core.util.Resource
 import com.mahmoudibrahem.omnicart.core.util.parseToErrorModel
 import com.mahmoudibrahem.omnicart.data.remote.OmniCartAPI
@@ -7,8 +8,11 @@ import com.mahmoudibrahem.omnicart.domain.model.CartItem
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.domain.model.HomeResponse
 import com.mahmoudibrahem.omnicart.domain.model.LoginResponse
+import com.mahmoudibrahem.omnicart.domain.model.Order
 import com.mahmoudibrahem.omnicart.domain.model.ProductData
 import com.mahmoudibrahem.omnicart.domain.model.RegisterResponse
+import com.mahmoudibrahem.omnicart.domain.model.SingleOrder
+import com.mahmoudibrahem.omnicart.domain.model.User
 import com.mahmoudibrahem.omnicart.domain.model.UserAddress
 import com.mahmoudibrahem.omnicart.domain.repository.NetworkRepository
 import kotlinx.coroutines.flow.Flow
@@ -76,6 +80,7 @@ class NetworkRepositoryImpl @Inject constructor(
             } catch (e: IOException) {
                 emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
             } catch (e: Exception) {
+                Log.d("```TAG```", "getHome: $e")
                 emit(Resource.Failure(message = "Unknown error happened, try again later"))
             }
         }
@@ -289,6 +294,76 @@ class NetworkRepositoryImpl @Inject constructor(
             } catch (e: IOException) {
                 emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
             } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun completeOrder(): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                api.completeOrder()
+                emit(Resource.Success(data = Unit))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun getMyOrders(): Flow<Resource<List<Order>>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getMyOrders()
+                emit(Resource.Success(data = response.orders.map { it.toOrder() }))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun getSingleOrderDetails(orderID: String): Flow<Resource<SingleOrder>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getSingleOrderDetails(orderID = orderID)
+                emit(Resource.Success(data = response.order.toSingleOrder()))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                Log.d("```TAG```", "getSingleOrderDetails: $e")
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun getMyInfo(): Flow<Resource<User>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getMyInfo()
+                emit(Resource.Success(data = response.toUser()))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                Log.d("```TAG```", "getSingleOrderDetails: $e")
                 emit(Resource.Failure(message = "Unknown error happened, try again later"))
             }
         }
