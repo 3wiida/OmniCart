@@ -3,6 +3,7 @@ package com.mahmoudibrahem.omnicart.presentation.screens.search_results
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mahmoudibrahem.omnicart.core.util.onResponse
+import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.domain.usecase.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,19 @@ class SearchResultsViewModel @Inject constructor(
         }
     }
 
+    fun sortResults(sortOption: SortOption) {
+        val oldList = uiState.value.resultsList.map { it.copy() }
+        val newList: List<CommonProduct> = when (sortOption) {
+            SortOption.AlphaAsc -> oldList.sortedBy { it.name }
+            SortOption.AlphaDes -> oldList.sortedBy { it.name }.reversed()
+            SortOption.PriceAcs -> oldList.sortedBy { it.price }
+            SortOption.PriceDes -> oldList.sortedBy { it.price }.reversed()
+            SortOption.RatingAcs -> oldList.sortedBy { it.rating }
+            SortOption.RatingDes -> oldList.sortedBy { it.rating }.reversed()
+        }
+        _uiState.update { it.copy(resultsList = newList) }
+    }
+
     private fun searchForProduct() {
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
@@ -51,7 +65,7 @@ class SearchResultsViewModel @Inject constructor(
         }
     }
 
-    fun setInitialStartingQuery(value:String){
+    fun setInitialStartingQuery(value: String) {
         onSearchQueryChanged(newValue = value)
     }
 }

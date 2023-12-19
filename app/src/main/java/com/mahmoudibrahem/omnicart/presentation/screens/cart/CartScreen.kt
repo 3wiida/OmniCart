@@ -71,7 +71,8 @@ fun CartScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToExplore: () -> Unit = {},
     onNavigateToAddress: () -> Unit = {},
-    onNavigateToAccount: () -> Unit = {}
+    onNavigateToAccount: () -> Unit = {},
+    onNavigateToOffer: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
@@ -80,7 +81,8 @@ fun CartScreen(
                 selectedItem = 2,
                 onNavigateToHome = onNavigateToHome,
                 onNavigateToExplore = onNavigateToExplore,
-                onNavigateToAccount = onNavigateToAccount
+                onNavigateToAccount = onNavigateToAccount,
+                onNavigateToOffer = onNavigateToOffer
             )
         }
     ) {

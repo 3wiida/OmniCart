@@ -363,7 +363,40 @@ class NetworkRepositoryImpl @Inject constructor(
             } catch (e: IOException) {
                 emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
             } catch (e: Exception) {
-                Log.d("```TAG```", "getSingleOrderDetails: $e")
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun getOfferProducts(): Flow<Resource<List<CommonProduct>>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getOfferProducts()
+                emit(Resource.Success(data = response.data.product.map { it.toCommonProduct() }))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun getCategoryProducts(categoryName: String): Flow<Resource<List<CommonProduct>>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getCategoryProducts(categoryName = categoryName)
+                emit(Resource.Success(data = response.data.products.map { it.toCommonProduct() }))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
                 emit(Resource.Failure(message = "Unknown error happened, try again later"))
             }
         }

@@ -66,6 +66,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.layout.ContentScale
+import com.mahmoudibrahem.omnicart.core.util.Converters.toStringJson
 import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +81,9 @@ fun HomeScreen(
     onNavigateToAccount: () -> Unit = {},
     onNavigateToAllCategories: () -> Unit = {},
     onNavigateToSingleCategory: (String) -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {}
+    onNavigateToFavorites: () -> Unit = {},
+    onNavigateToOffer: () -> Unit = {},
+    onNavigateToProducts: (String, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
@@ -89,7 +92,8 @@ fun HomeScreen(
                 selectedItem = 0,
                 onNavigateToExplore = onNavigateToExplore,
                 onNavigateToCart = onNavigateToCart,
-                onNavigateToAccount = onNavigateToAccount
+                onNavigateToAccount = onNavigateToAccount,
+                onNavigateToOffer = onNavigateToOffer
             )
         }
     ) {
@@ -100,7 +104,13 @@ fun HomeScreen(
             onFavoriteClicked = onNavigateToFavorites,
             onProductClicked = onNavigateToSingleProduct,
             onSeeAllCategoriesClicked = onNavigateToAllCategories,
-            onCategoryClicked = onNavigateToSingleCategory
+            onCategoryClicked = onNavigateToSingleCategory,
+            onSeeMoreClicked = { header, products ->
+                onNavigateToProducts(
+                    header,
+                    products.toStringJson()
+                )
+            }
         )
     }
 }
@@ -113,7 +123,8 @@ private fun HomeScreenContent(
     onSearchResultClicked: (String) -> Unit,
     onProductClicked: (String) -> Unit,
     onSeeAllCategoriesClicked: () -> Unit,
-    onCategoryClicked: (String) -> Unit
+    onCategoryClicked: (String) -> Unit,
+    onSeeMoreClicked: (String, List<CommonProduct>) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -155,7 +166,8 @@ private fun HomeScreenContent(
                         recommendedProducts = uiState.recommended,
                         onProductClicked = onProductClicked,
                         onSeeAllCategoriesClicked = onSeeAllCategoriesClicked,
-                        onCategoryClicked = onCategoryClicked
+                        onCategoryClicked = onCategoryClicked,
+                        onSeeMoreClicked = onSeeMoreClicked
                     )
                 }
             }
@@ -244,7 +256,8 @@ private fun HomeScreenBody(
     recommendedProducts: List<CommonProduct>,
     onProductClicked: (String) -> Unit,
     onSeeAllCategoriesClicked: () -> Unit,
-    onCategoryClicked: (String) -> Unit
+    onCategoryClicked: (String) -> Unit,
+    onSeeMoreClicked: (String, List<CommonProduct>) -> Unit
 ) {
     Column(
         Modifier
@@ -260,16 +273,19 @@ private fun HomeScreenBody(
         FreshSalesSection(
             isLoading = isLoading,
             freshSalesList = freshSalesList,
-            onProductClicked = onProductClicked
+            onProductClicked = onProductClicked,
+            onSeeMoreClicked = onSeeMoreClicked
         )
         TopSalesSection(
             isLoading = isLoading,
             topSalesList = topSalesList,
-            onProductClicked = onProductClicked
+            onProductClicked = onProductClicked,
+            onSeeMoreClicked = onSeeMoreClicked
         )
         RecommendedSection(
             recommendedProducts = recommendedProducts,
-            onProductClicked = onProductClicked
+            onProductClicked = onProductClicked,
+            onSeeMoreClicked = onSeeMoreClicked
         )
     }
 }
@@ -338,7 +354,8 @@ private fun CategorySection(
 private fun FreshSalesSection(
     isLoading: Boolean,
     freshSalesList: List<CommonProduct>,
-    onProductClicked: (String) -> Unit
+    onProductClicked: (String) -> Unit,
+    onSeeMoreClicked: (String, List<CommonProduct>) -> Unit
 ) {
     Column {
         Row(
@@ -353,6 +370,12 @@ private fun FreshSalesSection(
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onSeeMoreClicked("Fresh Sales", freshSalesList)
+                },
                 text = stringResource(R.string.see_more),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium
@@ -375,7 +398,7 @@ private fun FreshSalesSection(
             LazyRow(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(items = freshSalesList) { item ->
+                items(items = freshSalesList.take(10)) { item ->
                     ProductItem(
                         product = item,
                         onProductClicked = onProductClicked
@@ -390,7 +413,8 @@ private fun FreshSalesSection(
 private fun TopSalesSection(
     isLoading: Boolean,
     topSalesList: List<CommonProduct>,
-    onProductClicked: (String) -> Unit
+    onProductClicked: (String) -> Unit,
+    onSeeMoreClicked: (String, List<CommonProduct>) -> Unit
 ) {
     Column {
         Row(
@@ -405,6 +429,12 @@ private fun TopSalesSection(
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onSeeMoreClicked("Top Sales", topSalesList)
+                },
                 text = stringResource(R.string.see_more),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium
@@ -427,7 +457,7 @@ private fun TopSalesSection(
             LazyRow(
                 Modifier.fillMaxWidth()
             ) {
-                items(items = topSalesList) { item ->
+                items(items = topSalesList.take(10)) { item ->
                     ProductItem(
                         product = item,
                         onProductClicked = onProductClicked
@@ -441,7 +471,8 @@ private fun TopSalesSection(
 @Composable
 private fun RecommendedSection(
     recommendedProducts: List<CommonProduct>,
-    onProductClicked: (String) -> Unit
+    onProductClicked: (String) -> Unit,
+    onSeeMoreClicked: (String, List<CommonProduct>) -> Unit
 ) {
     Column(
         Modifier
@@ -452,11 +483,18 @@ private fun RecommendedSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(206.dp)
-                .clip(RoundedCornerShape(5.dp)),
+                .clip(RoundedCornerShape(5.dp))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onSeeMoreClicked("Recommended For You", recommendedProducts)
+                },
             contentAlignment = Alignment.CenterStart
         ) {
             Image(
                 modifier = Modifier.fillMaxSize(),
+
                 painter = painterResource(id = R.drawable.recommend_img),
                 contentDescription = "",
                 contentScale = ContentScale.Crop
@@ -478,10 +516,12 @@ private fun RecommendedSection(
             }
         }
         LazyRow(
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(items = recommendedProducts) { product ->
+            items(items = recommendedProducts.take(10)) { product ->
                 ProductItem(
                     product = product,
                     onProductClicked = onProductClicked
@@ -544,7 +584,9 @@ fun CategoryItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconButton(
-            onClick = {},
+            onClick = {
+                onCategoryClicked(category.name)
+            },
             modifier = Modifier
                 .size(70.dp)
                 .border(
@@ -662,28 +704,35 @@ private fun ProductItem(
             Column {
                 Text(
                     modifier = Modifier.padding(top = 4.dp),
-                    text = product.discount.toString() + "$",
+                    text = if (product.discount == null)
+                        "${product.price}$"
+                    else
+                        "${product.discount}$",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelSmall,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Row(
-                    modifier = Modifier.padding(top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = product.price.toString() + "$",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.titleSmall,
-                        overflow = TextOverflow.Ellipsis,
-                        textDecoration = TextDecoration.LineThrough
-                    )
-                    Text(
-                        text = "  " + product.disPercentage.toString() + "% Off",
-                        color = MaterialTheme.colorScheme.secondary,
-                        style = MaterialTheme.typography.labelSmall,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                if (product.discount != null) {
+                    Row(
+                        modifier = Modifier.padding(top = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = product.price.toString() + "$",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.titleSmall,
+                            overflow = TextOverflow.Ellipsis,
+                            textDecoration = TextDecoration.LineThrough
+                        )
+                        Text(
+                            text = "  ${product.disPercentage.toString()}% Off",
+                            color = MaterialTheme.colorScheme.secondary,
+                            style = MaterialTheme.typography.labelSmall,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }

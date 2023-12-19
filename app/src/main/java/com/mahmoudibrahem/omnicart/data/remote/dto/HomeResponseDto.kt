@@ -19,6 +19,8 @@ data class HomeResponseDto(
         val name: String,
         val overview: String,
         val price: Int,
+        val disPercentage: Int?,
+        val discount: Int?,
         val ratingAverage: Float,
         val ratingQuantity: Int,
         val slug: String,
@@ -114,8 +116,8 @@ data class HomeResponseDto(
             name = name,
             image = image,
             price = price,
-            discount = null,
-            disPercentage = null,
+            discount = discount,
+            disPercentage = disPercentage,
             id = _id
         )
     }

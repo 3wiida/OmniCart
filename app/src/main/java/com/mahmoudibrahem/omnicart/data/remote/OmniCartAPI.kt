@@ -1,9 +1,11 @@
 package com.mahmoudibrahem.omnicart.data.remote
 
 import com.mahmoudibrahem.omnicart.data.remote.dto.CartResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.CategoryProductsResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.HomeResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.LoginResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.MeResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.OfferResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.OrdersResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.ProductInfoDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.RegisterResponseDto
@@ -110,4 +112,12 @@ interface OmniCartAPI {
 
     @GET("me")
     suspend fun getMyInfo(): MeResponseDto
+
+    @GET("sales")
+    suspend fun getOfferProducts(): OfferResponseDto
+
+    @GET("categories/{category_name}")
+    suspend fun getCategoryProducts(
+        @Path("category_name") categoryName: String
+    ): CategoryProductsResponseDto
 }

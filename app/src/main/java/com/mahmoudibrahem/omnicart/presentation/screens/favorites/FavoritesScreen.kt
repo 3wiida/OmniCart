@@ -232,6 +232,7 @@ private fun FavoriteProduct(
             rating = product.rating,
             spaceBetween = 2.dp
         )
+
         Text(
             modifier = Modifier.padding(top = 8.dp),
             text = if (product.discount == null)

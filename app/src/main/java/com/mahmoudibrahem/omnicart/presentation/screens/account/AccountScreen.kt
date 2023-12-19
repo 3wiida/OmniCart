@@ -34,7 +34,8 @@ fun AccountScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToExplore: () -> Unit = {},
     onNavigateToCart: () -> Unit = {},
-    onNavigateToAccountOption: (Int) -> Unit = {},
+    onNavigateToOffer: () -> Unit = {},
+    onNavigateToAccountOption: (Int) -> Unit = {}
 ) {
     Scaffold(
         bottomBar = {
@@ -42,7 +43,8 @@ fun AccountScreen(
                 selectedItem = 4,
                 onNavigateToHome = onNavigateToHome,
                 onNavigateToExplore = onNavigateToExplore,
-                onNavigateToCart = onNavigateToCart
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToOffer = onNavigateToOffer
             )
         }
     ) {

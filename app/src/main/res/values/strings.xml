@@ -91,4 +91,11 @@
     <string name="status">Status</string>
     <string name="we_recommend_the_best_for_you">We recommend the best for you</string>
     <string name="recommended_products">Recommended\nProducts</string>
+    <string name="offers">Offers</string>
+    <string name="product_not_found">Product Not Found</string>
+    <string name="try_searching_again_with_another_words">Try searching again with another words</string>
+    <string name="sort_by">Sort By</string>
+    <string name="lowest_first">Lowest First</string>
+    <string name="rating">Rating</string>
+    <string name="alphabetic">Alphabetic</string>
 </resources>

@@ -21,16 +21,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,13 +45,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mahmoudibrahem.omnicart.R
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
+import com.mahmoudibrahem.omnicart.presentation.components.MainButton
 import com.mahmoudibrahem.omnicart.presentation.components.MainTextField
 import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
@@ -57,15 +73,34 @@ fun SearchResultsScreen(
     onNavigateToSingleProduct: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var isShowSortDialog by remember { mutableStateOf(false) }
+    var selectedSortOption by remember { mutableStateOf(SortOption.RatingDes) }
+
     SearchResultsScreenContent(
         uiState = uiState,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
-        onSortClicked = {},
+        onSortClicked = {
+            isShowSortDialog = !isShowSortDialog
+        },
         onFilterClicked = {},
         onProductClicked = onNavigateToSingleProduct
     )
     LaunchedEffect(key1 = startingQuery) {
         viewModel.setInitialStartingQuery(startingQuery)
+    }
+    AnimatedVisibility(
+        visible = isShowSortDialog,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        SortDialog(
+            selectedOption = selectedSortOption,
+            onDismiss = { isShowSortDialog = !isShowSortDialog },
+            onOptionSelected = { sortOption ->
+                selectedSortOption = sortOption
+                viewModel.sortResults(sortOption = sortOption)
+            }
+        )
     }
 }
 
@@ -102,7 +137,14 @@ private fun SearchResultsScreenContent(
             LoadingState()
         }
         AnimatedVisibility(
-            visible = !uiState.isLoading,
+            visible = !uiState.isLoading && uiState.resultsList.isEmpty(),
+            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+            exit = fadeOut()
+        ) {
+            EmptyState()
+        }
+        AnimatedVisibility(
+            visible = !uiState.isLoading && uiState.resultsList.isNotEmpty(),
             enter = fadeIn(animationSpec = tween(delayMillis = 500)),
             exit = fadeOut()
         ) {
@@ -328,8 +370,236 @@ private fun SingleProductItem(
     }
 }
 
+@Composable
+private fun EmptyState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val composition by rememberLottieComposition(
+                LottieCompositionSpec.RawRes(R.raw.search_empty_anim)
+            )
+            LottieAnimation(
+                modifier = Modifier.size(200.dp),
+                composition = composition,
+                iterations = LottieConstants.IterateForever
+            )
+            Text(
+                modifier = Modifier.padding(top = 16.dp),
+                text = stringResource(R.string.product_not_found),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = stringResource(R.string.try_searching_again_with_another_words),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Composable
+fun SortDialog(
+    onDismiss: () -> Unit,
+    selectedOption: SortOption = SortOption.RatingDes,
+    onOptionSelected: (SortOption) -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 26.dp, start = 16.dp, end = 16.dp, bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(R.string.sort_by),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = stringResource(id = R.string.price),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SortOptionItem(
+                            modifier = Modifier.weight(1f),
+                            option = "Lowest First",
+                            optionEnum = SortOption.PriceAcs,
+                            selectedOption = selectedOption,
+                            onOptionSelected = {
+                                onOptionSelected(SortOption.PriceAcs)
+                                onDismiss()
+                            }
+                        )
+                        SortOptionItem(
+                            modifier = Modifier.weight(1f),
+                            option = "Highest First",
+                            optionEnum = SortOption.PriceDes,
+                            selectedOption = selectedOption,
+                            onOptionSelected = {
+                                onOptionSelected(SortOption.PriceDes)
+                                onDismiss()
+                            }
+                        )
+                    }
+                }
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = stringResource(R.string.rating),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SortOptionItem(
+                            modifier = Modifier.weight(1f),
+                            option = "Lowest First",
+                            optionEnum = SortOption.RatingAcs,
+                            selectedOption = selectedOption,
+                            onOptionSelected = {
+                                onOptionSelected(SortOption.RatingAcs)
+                                onDismiss()
+                            }
+                        )
+                        SortOptionItem(
+                            modifier = Modifier.weight(1f),
+                            option = "Highest First",
+                            optionEnum = SortOption.RatingDes,
+                            selectedOption = selectedOption,
+                            onOptionSelected = {
+                                onOptionSelected(SortOption.RatingDes)
+                                onDismiss()
+                            }
+                        )
+                    }
+                }
+
+                Column(
+                    Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = stringResource(R.string.alphabetic),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SortOptionItem(
+                            modifier = Modifier.weight(1f),
+                            option = "A-Z",
+                            optionEnum = SortOption.AlphaAsc,
+                            selectedOption = selectedOption,
+                            onOptionSelected = {
+                                onOptionSelected(SortOption.AlphaAsc)
+                                onDismiss()
+                            }
+                        )
+                        SortOptionItem(
+                            modifier = Modifier.weight(1f),
+                            option = "Z-A",
+                            optionEnum = SortOption.AlphaDes,
+                            selectedOption = selectedOption,
+                            onOptionSelected = {
+                                onOptionSelected(SortOption.AlphaDes)
+                                onDismiss()
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SortOptionItem(
+    modifier: Modifier = Modifier,
+    option: String,
+    selectedOption: SortOption,
+    optionEnum: SortOption,
+    onOptionSelected: () -> Unit
+) {
+    TextButton(
+        modifier = modifier
+            .clip(RoundedCornerShape(5.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .background(
+                color = if (selectedOption == optionEnum)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surface
+            ),
+        onClick = {
+            onOptionSelected()
+        }
+    ) {
+        Text(
+            text = option,
+            color = if (selectedOption == optionEnum)
+                MaterialTheme.colorScheme.surface
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant,
+            style = if (selectedOption == optionEnum)
+                MaterialTheme.typography.labelSmall
+            else
+                MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
 @Preview(showSystemUi = true)
 @Composable
 fun SearchResultsScreenPreview() {
     SearchResultsScreen()
+}
+
+enum class SortOption {
+    AlphaAsc,
+    AlphaDes,
+    PriceAcs,
+    PriceDes,
+    RatingAcs,
+    RatingDes,
 }

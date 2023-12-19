@@ -5,11 +5,14 @@ import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ADD_ADDRESS_SCRE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ALL_CATEGORIES_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ALL_REVIEWS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.CART_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.CATEGORY_PRODUCTS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.EXPLORE_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.FAVORITES_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.HOME_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.LOGIN_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.OFFER_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ORDERS_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.PRODUCTS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.PROFILE_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SEARCH_RESULTS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SIGNUP_SCREEN_ROUTE
@@ -36,4 +39,7 @@ sealed class AppScreens(val route: String) {
     object Orders : AppScreens(route = ORDERS_SCREEN_ROUTE)
     object SingleOrder : AppScreens(route = SINGLE_ORDER_SCREEN_ROUTE)
     object Profile : AppScreens(route = PROFILE_SCREEN_ROUTE)
+    object Offer : AppScreens(route = OFFER_SCREEN_ROUTE)
+    object CategoryProducts : AppScreens(route = CATEGORY_PRODUCTS_SCREEN_ROUTE)
+    object ProductsScreen : AppScreens(route = PRODUCTS_SCREEN_ROUTE)
 }

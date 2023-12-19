@@ -50,8 +50,8 @@ class HomeScreenViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             errorMsg = null,
-                            topSalesList = response!!.topSales.take(10),
-                            freshSalesList = response.freshSales.take(10),
+                            topSalesList = response!!.topSales,
+                            freshSalesList = response.freshSales,
                             recommended = response.recommended,
                             categoryList = categoryList
                         )

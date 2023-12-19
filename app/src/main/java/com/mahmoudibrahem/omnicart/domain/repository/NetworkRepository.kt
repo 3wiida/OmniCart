@@ -71,4 +71,8 @@ interface NetworkRepository {
     suspend fun getSingleOrderDetails(orderID: String): Flow<Resource<SingleOrder>>
 
     suspend fun getMyInfo(): Flow<Resource<User>>
+
+    suspend fun getOfferProducts(): Flow<Resource<List<CommonProduct>>>
+
+    suspend fun getCategoryProducts(categoryName: String): Flow<Resource<List<CommonProduct>>>
 }

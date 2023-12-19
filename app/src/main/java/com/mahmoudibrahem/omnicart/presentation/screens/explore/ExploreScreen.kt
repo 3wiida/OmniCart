@@ -55,7 +55,8 @@ fun ExploreScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToSearchResults: (String) -> Unit = {},
     onNavigateToCart: () -> Unit = {},
-    onNavigateToAccount: () -> Unit = {}
+    onNavigateToAccount: () -> Unit = {},
+    onNavigateToOffer: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
@@ -64,7 +65,8 @@ fun ExploreScreen(
                 selectedItem = 1,
                 onNavigateToHome = onNavigateToHome,
                 onNavigateToCart = onNavigateToCart,
-                onNavigateToAccount = onNavigateToAccount
+                onNavigateToAccount = onNavigateToAccount,
+                onNavigateToOffer = onNavigateToOffer
             )
         }
     ) {
