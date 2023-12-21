@@ -401,4 +401,46 @@ class NetworkRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun getResetPasswordOTP(email: String): Flow<Resource<String>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getResetPasswordOTP(email = email)
+                emit(Resource.Success(data = response.resetToken))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun resetPassword(
+        token: String,
+        password: String,
+        confirmPassword: String
+    ): Flow<Resource<Unit>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                api.resetPassword(
+                    token = token,
+                    password = password,
+                    confirmPassword = confirmPassword
+                )
+                emit(Resource.Success(data = Unit))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
 }

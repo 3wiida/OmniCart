@@ -55,16 +55,14 @@ import com.mahmoudibrahem.omnicart.presentation.components.BottomNavigationBar
 import com.mahmoudibrahem.omnicart.presentation.components.MainTextField
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import com.mahmoudibrahem.omnicart.core.util.Converters.toStringJson
 import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
@@ -113,6 +111,7 @@ fun HomeScreen(
             }
         )
     }
+
 }
 
 @Composable
@@ -297,6 +296,17 @@ private fun CategorySection(
     isLoading: Boolean,
     categoriesList: List<Category>
 ) {
+    val loadingContentAlpha = animateFloatAsState(
+        targetValue = if (isLoading) 1f else 0f,
+        animationSpec = tween(durationMillis = 500, easing = LinearEasing),
+        label = ""
+    )
+    val realContentAlpha = animateFloatAsState(
+        targetValue = if (isLoading) 0f else 1f,
+        animationSpec = tween(delayMillis = 600, easing = LinearEasing),
+        label = ""
+    )
+
     Column {
         Row(
             modifier = Modifier
@@ -321,22 +331,14 @@ private fun CategorySection(
                 style = MaterialTheme.typography.labelMedium
             )
         }
-
-        AnimatedVisibility(
-            visible = isLoading,
-            enter = fadeIn(),
-            exit = fadeOut(animationSpec = tween(durationMillis = 500))
-        ) {
-            CategoryLoadingState()
-        }
-
-        AnimatedVisibility(
-            visible = !isLoading,
-            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
-            exit = fadeOut()
-        ) {
+        Box {
+            CategoryLoadingState(
+                contentAlpha = loadingContentAlpha.value
+            )
             LazyRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer { alpha = realContentAlpha.value },
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(items = categoriesList) { item ->
@@ -357,6 +359,17 @@ private fun FreshSalesSection(
     onProductClicked: (String) -> Unit,
     onSeeMoreClicked: (String, List<CommonProduct>) -> Unit
 ) {
+    val loadingContentAlpha = animateFloatAsState(
+        targetValue = if (isLoading) 1f else 0f,
+        animationSpec = tween(durationMillis = 500, easing = LinearEasing),
+        label = ""
+    )
+    val realContentAlpha = animateFloatAsState(
+        targetValue = if (isLoading) 0f else 1f,
+        animationSpec = tween(delayMillis = 600, easing = LinearEasing),
+        label = ""
+    )
+
     Column {
         Row(
             modifier = Modifier
@@ -381,22 +394,15 @@ private fun FreshSalesSection(
                 style = MaterialTheme.typography.labelMedium
             )
         }
-
-        AnimatedVisibility(
-            visible = isLoading,
-            enter = fadeIn(),
-            exit = fadeOut(animationSpec = tween(durationMillis = 500))
-        ) {
-            ProductsLoadingState()
-        }
-
-        AnimatedVisibility(
-            visible = !isLoading,
-            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
-            exit = fadeOut()
-        ) {
+        Box {
+            ProductsLoadingState(
+                contentAlpha = loadingContentAlpha.value
+            )
             LazyRow(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer { alpha = realContentAlpha.value },
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(items = freshSalesList.take(10)) { item ->
                     ProductItem(
@@ -416,6 +422,16 @@ private fun TopSalesSection(
     onProductClicked: (String) -> Unit,
     onSeeMoreClicked: (String, List<CommonProduct>) -> Unit
 ) {
+    val loadingContentAlpha = animateFloatAsState(
+        targetValue = if (isLoading) 1f else 0f,
+        animationSpec = tween(durationMillis = 500, easing = LinearEasing),
+        label = ""
+    )
+    val realContentAlpha = animateFloatAsState(
+        targetValue = if (isLoading) 0f else 1f,
+        animationSpec = tween(delayMillis = 600, easing = LinearEasing),
+        label = ""
+    )
     Column {
         Row(
             modifier = Modifier
@@ -440,22 +456,15 @@ private fun TopSalesSection(
                 style = MaterialTheme.typography.labelMedium
             )
         }
-
-        AnimatedVisibility(
-            visible = isLoading,
-            enter = fadeIn(),
-            exit = fadeOut(animationSpec = tween(durationMillis = 500))
-        ) {
-            ProductsLoadingState()
-        }
-
-        AnimatedVisibility(
-            visible = !isLoading,
-            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
-            exit = fadeOut()
-        ) {
+        Box {
+            ProductsLoadingState(
+                contentAlpha = loadingContentAlpha.value
+            )
             LazyRow(
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer { alpha = realContentAlpha.value },
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(items = topSalesList.take(10)) { item ->
                     ProductItem(
@@ -532,9 +541,13 @@ private fun RecommendedSection(
 }
 
 @Composable
-private fun CategoryLoadingState() {
+private fun CategoryLoadingState(
+    contentAlpha: Float
+) {
     LazyRow(
-        Modifier.fillMaxWidth()
+        Modifier
+            .fillMaxWidth()
+            .graphicsLayer { alpha = contentAlpha }
     ) {
         items(count = 5) {
             Column(
@@ -566,13 +579,6 @@ fun CategoryItem(
     category: Category,
     onCategoryClicked: (String) -> Unit
 ) {
-    val itemAlpha = remember { Animatable(initialValue = 0f) }
-    LaunchedEffect(key1 = null) {
-        itemAlpha.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 200)
-        )
-    }
     Column(
         modifier = Modifier
             .clickable(
@@ -612,9 +618,13 @@ fun CategoryItem(
 }
 
 @Composable
-private fun ProductsLoadingState() {
+private fun ProductsLoadingState(
+    contentAlpha: Float
+) {
     LazyRow(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { alpha = contentAlpha }
     ) {
         items(count = 5) {
             Column(
@@ -622,7 +632,7 @@ private fun ProductsLoadingState() {
             ) {
                 Spacer(
                     modifier = Modifier
-                        .size(width = 140.dp, height = 230.dp)
+                        .size(width = 140.dp, height = 190.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(brush = shimmerBrush())
                 )
@@ -667,7 +677,6 @@ private fun ProductItem(
         modifier = Modifier
             .size(width = 156.dp, height = 230.dp)
             .graphicsLayer { alpha = itemAlpha.value }
-            .padding(end = 16.dp)
             .clip(RoundedCornerShape(5.dp))
             .border(
                 width = 1.dp,
@@ -684,7 +693,8 @@ private fun ProductItem(
     ) {
         NetworkImage(
             modifier = Modifier
-                .size(110.dp)
+                .fillMaxWidth()
+                .height(110.dp)
                 .clip(RoundedCornerShape(5.dp)),
             model = product.image,
             contentScale = ContentScale.FillBounds

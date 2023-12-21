@@ -37,16 +37,19 @@ fun MainTextField(
     error: String? = null,
     singleLine: Boolean = true,
     imeAction: ImeAction = ImeAction.Next,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    enabled: Boolean = true
 ) {
     var isFocused: Boolean by remember { mutableStateOf(false) }
     var isShowPassword: Boolean by remember { mutableStateOf(false) }
     var visualTransformation: VisualTransformation by remember { mutableStateOf(VisualTransformation.None) }
-    visualTransformation = if (isPassword && !isShowPassword) PasswordVisualTransformation() else VisualTransformation.None
-    
+    visualTransformation =
+        if (isPassword && !isShowPassword) PasswordVisualTransformation() else VisualTransformation.None
+
     OutlinedTextField(
         modifier = modifier.onFocusChanged { isFocused = it.isFocused },
         value = value,
+        enabled = enabled,
         onValueChange = onValueChanged,
         isError = error != null,
         singleLine = singleLine,
@@ -110,7 +113,9 @@ fun MainTextField(
             textColor = MaterialTheme.colorScheme.onSurfaceVariant,
             errorBorderColor = MaterialTheme.colorScheme.secondary,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            disabledBorderColor = MaterialTheme.colorScheme.outline,
+            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         keyboardOptions = KeyboardOptions(imeAction = imeAction),
         visualTransformation = visualTransformation

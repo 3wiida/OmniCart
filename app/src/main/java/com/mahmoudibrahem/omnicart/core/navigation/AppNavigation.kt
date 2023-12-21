@@ -1,6 +1,8 @@
 package com.mahmoudibrahem.omnicart.core.navigation
 
-import android.app.Activity
+import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -11,6 +13,9 @@ import com.mahmoudibrahem.omnicart.presentation.screens.account.AccountScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.add_address.AddAddressScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.all_categories.AllCategoriesScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.all_reviews.AllReviewsScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.auth.forget_password.EmailEnterScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.auth.forget_password.OTPEnterScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.auth.forget_password.ResetPasswordScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.auth.login.LoginScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.auth.register.RegisterScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.cart.CartScreen
@@ -32,13 +37,17 @@ import com.mahmoudibrahem.omnicart.presentation.screens.user_address.UserAddress
 fun AppNavigation(
     navController: NavHostController,
     startDestination: String,
-    host: Activity
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        enterTransition = {
+            fadeIn(animationSpec = SpringSpec(dampingRatio = 0.6573f, stiffness = 100f))
+        },
+        exitTransition = {
+            fadeOut(animationSpec = SpringSpec(dampingRatio = 0.6573f, stiffness = 100f))
+        }
     ) {
-
         /**Auth Screens*/
         composable(route = AppScreens.Login.route) {
             LoginScreen(
@@ -49,16 +58,69 @@ fun AppNavigation(
                             this.inclusive = true
                         }
                     }
+                },
+                onNavigateToForgotPassword = {
+                    navController.navigate(route = AppScreens.EmailEnter.route) {
+                    }
                 }
             )
         }
 
-        composable(route = AppScreens.Register.route) {
+
+        composable(
+            route = AppScreens.Register.route,
+        ) {
             RegisterScreen(
                 onNavigateToLogin = { navController.navigate(route = AppScreens.Login.route) },
                 onNavigateToHome = { navController.navigate(route = AppScreens.Login.route) }
             )
 
+        }
+
+        composable(route = AppScreens.EmailEnter.route) {
+            EmailEnterScreen(
+                onNavigateToOTPEnter = { correctOTP ->
+                    navController.navigate(
+                        route = AppScreens.OTPEnter.route.replace(
+                            "{otp}",
+                            correctOTP
+                        )
+                    )
+                }
+            )
+        }
+
+        composable(route = AppScreens.OTPEnter.route) { navBackStackEntry ->
+            val correctOTP = navBackStackEntry.arguments?.getString("otp")
+            correctOTP?.let {
+                OTPEnterScreen(
+                    correctOTP = it,
+                    onNavigateToResetPassword = { token ->
+                        navController.navigate(
+                            route = AppScreens.ResetPassword.route.replace(
+                                "{token}",
+                                token
+                            )
+                        ) {
+                            popUpTo(route = AppScreens.Login.route)
+                        }
+                    }
+                )
+            }
+        }
+
+        composable(route = AppScreens.ResetPassword.route) { navBackStackEntry ->
+            val token = navBackStackEntry.arguments?.getString("token")
+            token?.let {
+                ResetPasswordScreen(
+                    token = it,
+                    onNavigateToLogin = {
+                        navController.navigate(route = AppScreens.Login.route) {
+                            popUpTo(AppScreens.Login.route)
+                        }
+                    }
+                )
+            }
         }
 
 
@@ -135,9 +197,10 @@ fun AppNavigation(
         composable(route = AppScreens.Explore.route) {
             ExploreScreen(
                 onNavigateToHome = {
-                    navController.navigate(route = AppScreens.Home.route) {
+                    /*navController.navigate(route = AppScreens.Home.route) {
                         popUpTo(route = AppScreens.Home.route)
-                    }
+                    }*/
+                    navController.navigateUp()
                 },
                 onNavigateToCart = {
                     navController.navigate(route = AppScreens.Cart.route) {
@@ -171,9 +234,10 @@ fun AppNavigation(
         composable(route = AppScreens.Cart.route) {
             CartScreen(
                 onNavigateToHome = {
-                    navController.navigate(route = AppScreens.Home.route) {
+                    /*navController.navigate(route = AppScreens.Home.route) {
                         popUpTo(route = AppScreens.Home.route)
-                    }
+                    }*/
+                    navController.navigateUp()
                 },
                 onNavigateToExplore = {
                     navController.navigate(route = AppScreens.Explore.route) {
@@ -212,9 +276,10 @@ fun AppNavigation(
                     )
                 },
                 onNavigateToHome = {
-                    navController.navigate(route = AppScreens.Home.route) {
+                    /*navController.navigate(route = AppScreens.Home.route) {
                         popUpTo(route = AppScreens.Home.route)
-                    }
+                    }*/
+                    navController.navigateUp()
                 },
                 onNavigateToExplore = {
                     navController.navigate(route = AppScreens.Explore.route) {
@@ -237,9 +302,10 @@ fun AppNavigation(
         composable(route = AppScreens.Account.route) {
             AccountScreen(
                 onNavigateToHome = {
-                    navController.navigate(route = AppScreens.Home.route) {
+                    /*navController.navigate(route = AppScreens.Home.route) {
                         popUpTo(route = AppScreens.Home.route)
-                    }
+                    }*/
+                    navController.navigateUp()
                 },
                 onNavigateToExplore = {
                     navController.navigate(route = AppScreens.Explore.route) {

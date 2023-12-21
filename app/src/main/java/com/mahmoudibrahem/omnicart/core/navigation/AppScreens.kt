@@ -6,14 +6,17 @@ import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ALL_CATEGORIES_S
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ALL_REVIEWS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.CART_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.CATEGORY_PRODUCTS_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.EMAIL_ENTER_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.EXPLORE_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.FAVORITES_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.HOME_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.LOGIN_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.OFFER_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.ORDERS_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.OTP_ENTER_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.PRODUCTS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.PROFILE_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.RESET_PASSWORD_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SEARCH_RESULTS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SIGNUP_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SINGLE_ORDER_SCREEN_ROUTE
@@ -42,4 +45,8 @@ sealed class AppScreens(val route: String) {
     object Offer : AppScreens(route = OFFER_SCREEN_ROUTE)
     object CategoryProducts : AppScreens(route = CATEGORY_PRODUCTS_SCREEN_ROUTE)
     object ProductsScreen : AppScreens(route = PRODUCTS_SCREEN_ROUTE)
+    object EmailEnter : AppScreens(route = EMAIL_ENTER_SCREEN_ROUTE)
+    object OTPEnter : AppScreens(route = OTP_ENTER_SCREEN_ROUTE)
+    object ResetPassword : AppScreens(route = RESET_PASSWORD_SCREEN_ROUTE)
+
 }

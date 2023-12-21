@@ -5,6 +5,7 @@ import com.mahmoudibrahem.omnicart.data.remote.dto.CategoryProductsResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.HomeResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.LoginResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.MeResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.OTPResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.OfferResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.OrdersResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.ProductInfoDto
@@ -120,4 +121,16 @@ interface OmniCartAPI {
     suspend fun getCategoryProducts(
         @Path("category_name") categoryName: String
     ): CategoryProductsResponseDto
+
+    @POST("forgetpassword")
+    suspend fun getResetPasswordOTP(
+        @Query("email") email: String
+    ): OTPResponseDto
+
+    @POST("resetpassword")
+    suspend fun resetPassword(
+        @Query("token") token: String,
+        @Query("password") password: String,
+        @Query("confirmPassword") confirmPassword: String
+    )
 }

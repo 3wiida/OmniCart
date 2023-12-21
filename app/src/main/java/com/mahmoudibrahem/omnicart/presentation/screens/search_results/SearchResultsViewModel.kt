@@ -47,6 +47,22 @@ class SearchResultsViewModel @Inject constructor(
         _uiState.update { it.copy(resultsList = newList) }
     }
 
+    fun filterResults(
+        minPrice: Int,
+        maxPrice: Int,
+        minRatting: Int,
+        maxRatting: Int
+    ) {
+        val oldList = uiState.value.originalResults.map { it.copy() }
+        val newList: List<CommonProduct> = oldList.filter { product ->
+            (product.discount ?: product.price) >= minPrice &&
+                    (product.discount ?: product.price) <= maxPrice &&
+                    product.rating >= minRatting &&
+                    product.rating <= maxRatting
+        }
+        _uiState.update { it.copy(resultsList = newList) }
+    }
+
     private fun searchForProduct() {
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
@@ -56,7 +72,13 @@ class SearchResultsViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = true) }
                 },
                 onSuccess = { results ->
-                    _uiState.update { it.copy(resultsList = results!!, isLoading = false) }
+                    _uiState.update {
+                        it.copy(
+                            resultsList = results!!,
+                            originalResults = results,
+                            isLoading = false
+                        )
+                    }
                 },
                 onFailure = {
                     _uiState.update { it.copy(isLoading = false) }

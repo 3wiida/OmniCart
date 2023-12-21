@@ -127,6 +127,15 @@ private fun CartScreenContent(
                 .padding(top = 26.dp, bottom = 80.dp)
         ) {
             ScreenHeader()
+
+            AnimatedVisibility(
+                visible = uiState.isLoading,
+                enter = fadeIn(),
+                exit = fadeOut(animationSpec = tween(durationMillis = 500))
+            ) {
+                LoadingState()
+            }
+
             AnimatedVisibility(
                 visible = uiState.cartItems.isEmpty() && !uiState.isLoading,
                 enter = fadeIn(animationSpec = tween(delayMillis = 500)),
@@ -136,13 +145,7 @@ private fun CartScreenContent(
                     onBackToHomeClicked = onBackToHomeClicked
                 )
             }
-            AnimatedVisibility(
-                visible = uiState.isLoading,
-                enter = fadeIn(),
-                exit = fadeOut(animationSpec = tween(durationMillis = 500))
-            ) {
-                LoadingState()
-            }
+
             AnimatedVisibility(
                 visible = !uiState.isLoading && uiState.cartItems.isNotEmpty(),
                 enter = fadeIn(animationSpec = tween(delayMillis = 500)),

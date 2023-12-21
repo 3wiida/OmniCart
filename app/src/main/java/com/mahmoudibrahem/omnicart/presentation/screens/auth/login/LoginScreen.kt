@@ -36,7 +36,8 @@ import com.mahmoudibrahem.omnicart.presentation.components.MainTextField
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     onNavigateToRegister: () -> Unit = {},
-    onNavigateToHome: () -> Unit = {}
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     LoginScreenContent(
@@ -44,7 +45,7 @@ fun LoginScreen(
         onEmailChanged = viewModel::onEmailChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
         onSignInClicked = viewModel::onLoginButtonClicked,
-        onForgetPasswordClicked = {},
+        onForgetPasswordClicked = onNavigateToForgotPassword,
         onRegisterClicked = onNavigateToRegister
     )
     LaunchedEffect(key1 = uiState.isLoginSuccessful) {

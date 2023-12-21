@@ -100,8 +100,8 @@ private fun OrdersScreenContent(
             }
             AnimatedVisibility(
                 visible = !uiState.isLoading && uiState.orders.isEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+                exit = fadeOut()
             ) {
                 EmptyState(
                     onBackToHomeClicked = onBackToHomeClicked

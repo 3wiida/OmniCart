@@ -98,4 +98,16 @@
     <string name="lowest_first">Lowest First</string>
     <string name="rating">Rating</string>
     <string name="alphabetic">Alphabetic</string>
+    <string name="filter_search">Filter Search</string>
+    <string name="price_range">Price Range</string>
+    <string name="ratting_range">Ratting Range</string>
+    <string name="apply">Apply</string>
+    <string name="otp_code">OTP Code</string>
+    <string name="enter_the_otp_code_you_received_on_your_email">Enter the OTP code you received on your email</string>
+    <string name="enter_the_otp_code">Enter the OTP code</string>
+    <string name="reset">Reset</string>
+    <string name="enter_the_new_password_make_sure_that_it_s_strong">Enter the new password, make sure that it\'s strong</string>
+    <string name="enter_your_email_to_send_the_verification_code">Enter your email to send the verification code</string>
+    <string name="send_code">Send Code</string>
+    <string name="enter_your_email">Enter Your Email</string>
 </resources>

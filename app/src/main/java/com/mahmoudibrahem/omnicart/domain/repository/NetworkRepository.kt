@@ -75,4 +75,12 @@ interface NetworkRepository {
     suspend fun getOfferProducts(): Flow<Resource<List<CommonProduct>>>
 
     suspend fun getCategoryProducts(categoryName: String): Flow<Resource<List<CommonProduct>>>
+
+    suspend fun getResetPasswordOTP(email: String): Flow<Resource<String>>
+
+    suspend fun resetPassword(
+        token: String,
+        password: String,
+        confirmPassword: String
+    ): Flow<Resource<Unit>>
 }

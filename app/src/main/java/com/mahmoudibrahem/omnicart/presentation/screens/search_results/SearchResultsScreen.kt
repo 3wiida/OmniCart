@@ -1,9 +1,11 @@
 package com.mahmoudibrahem.omnicart.presentation.screens.search_results
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,17 +25,21 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,8 +58,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -74,15 +78,18 @@ fun SearchResultsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var isShowSortDialog by remember { mutableStateOf(false) }
+    var isShowFilterDialog by remember { mutableStateOf(false) }
     var selectedSortOption by remember { mutableStateOf(SortOption.RatingDes) }
-
+    val filterValues = remember { mutableStateListOf(0, 100000, 0, 5) }
     SearchResultsScreenContent(
         uiState = uiState,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
         onSortClicked = {
             isShowSortDialog = !isShowSortDialog
         },
-        onFilterClicked = {},
+        onFilterClicked = {
+            isShowFilterDialog = !isShowFilterDialog
+        },
         onProductClicked = onNavigateToSingleProduct
     )
     LaunchedEffect(key1 = startingQuery) {
@@ -99,6 +106,30 @@ fun SearchResultsScreen(
             onOptionSelected = { sortOption ->
                 selectedSortOption = sortOption
                 viewModel.sortResults(sortOption = sortOption)
+            }
+        )
+    }
+    AnimatedVisibility(
+        visible = isShowFilterDialog,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        FilterDialog(
+            onDismiss = {
+                isShowFilterDialog = !isShowFilterDialog
+            },
+            values = filterValues,
+            onApplyClicked = { minPrice, maxPrice, minRatting, maxRatting ->
+                viewModel.filterResults(
+                    minPrice = minPrice,
+                    maxPrice = maxPrice,
+                    minRatting = minRatting,
+                    maxRatting = maxRatting
+                )
+                filterValues[0] = minPrice
+                filterValues[1] = maxPrice
+                filterValues[2] = minRatting
+                filterValues[3] = maxRatting
             }
         )
     }
@@ -199,6 +230,7 @@ private fun SearchResultsScreenHeader(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ResultsSection(
     results: List<CommonProduct>,
@@ -223,6 +255,7 @@ private fun ResultsSection(
         ) {
             items(count = results.size) { pos ->
                 SingleProductItem(
+                    modifier = Modifier.animateItemPlacement(),
                     product = results[pos],
                     onProductClicked = onProductClicked
                 )
@@ -290,11 +323,12 @@ private fun LoadingState() {
 
 @Composable
 private fun SingleProductItem(
+    modifier: Modifier = Modifier,
     product: CommonProduct,
     onProductClicked: (String) -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .size(width = 156.dp, height = 230.dp)
             .clip(RoundedCornerShape(5.dp))
             .border(
@@ -385,7 +419,7 @@ private fun EmptyState() {
                 LottieCompositionSpec.RawRes(R.raw.search_empty_anim)
             )
             LottieAnimation(
-                modifier = Modifier.size(200.dp),
+                modifier = Modifier.size(150.dp),
                 composition = composition,
                 iterations = LottieConstants.IterateForever
             )
@@ -586,6 +620,142 @@ private fun SortOptionItem(
             else
                 MaterialTheme.typography.bodySmall
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterDialog(
+    onDismiss: () -> Unit,
+    values: List<Int> = listOf(0, 100000, 0, 5),
+    onApplyClicked: (Int, Int, Int, Int) -> Unit
+) {
+    var minPrice by remember { mutableIntStateOf(values[0]) }
+    var maxPrice by remember { mutableIntStateOf(values[1]) }
+    var minRating by remember { mutableIntStateOf(values[2]) }
+    var maxRating by remember { mutableIntStateOf(values[3]) }
+    var priceSliderPosition by remember { mutableStateOf(values[0].toFloat()..values[1].toFloat()) }
+    var rattingSliderPosition by remember { mutableStateOf(values[2].toFloat()..values[3].toFloat()) }
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 26.dp, start = 16.dp, end = 16.dp, bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(R.string.filter_search),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = stringResource(R.string.price_range),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        MainTextField(
+                            modifier = Modifier.weight(1f),
+                            value = "$$minPrice",
+                            enabled = false
+                        )
+                        MainTextField(
+                            modifier = Modifier.weight(1f),
+                            value = "$$maxPrice",
+                            enabled = false
+                        )
+                    }
+                    RangeSlider(
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        value = priceSliderPosition,
+                        valueRange = 0f..100000f,
+                        onValueChange = { range ->
+                            priceSliderPosition = range
+                            minPrice = range.start.toInt()
+                            maxPrice = range.endInclusive.toInt()
+                        },
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTickColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+                    Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = stringResource(R.string.ratting_range),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        MainTextField(
+                            modifier = Modifier.weight(1f),
+                            value = "$minRating",
+                            enabled = false
+                        )
+                        MainTextField(
+                            modifier = Modifier.weight(1f),
+                            value = "$maxRating",
+                            enabled = false
+                        )
+                    }
+                    RangeSlider(
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        value = rattingSliderPosition,
+                        valueRange = 0f..5f,
+                        onValueChange = { range ->
+                            Log.d("```TAG```", "FilterDialog: $range")
+                            rattingSliderPosition = range
+                            minRating = range.start.toInt()
+                            maxRating = range.endInclusive.toInt()
+                        },
+                        steps = 4,
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTickColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+                    MainButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp),
+                        text = stringResource(R.string.apply),
+                        onClick = {
+                            onDismiss()
+                            onApplyClicked(minPrice, maxPrice, minRating, maxRating)
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 

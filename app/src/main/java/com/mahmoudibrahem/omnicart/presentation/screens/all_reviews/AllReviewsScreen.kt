@@ -208,7 +208,7 @@ fun FilterSection(
             ) {
                 if (index != 0) {
                     Icon(
-                        painter = painterResource(id = R.drawable.star_fill_icon),
+                        painter = painterResource(id = R.drawable.star_full_icon),
                         contentDescription = "",
                         tint = Color.Unspecified
                     )
