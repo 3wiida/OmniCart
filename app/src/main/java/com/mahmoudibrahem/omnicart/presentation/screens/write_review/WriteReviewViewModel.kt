@@ -1,5 +1,6 @@
 package com.mahmoudibrahem.omnicart.presentation.screens.write_review
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mahmoudibrahem.omnicart.core.util.onResponse
@@ -16,15 +17,17 @@ import javax.inject.Inject
 class WriteReviewViewModel @Inject constructor(
     private val sendReviewUseCase: SendReviewUseCase
 ) : ViewModel() {
+
+    private var productID: String = ""
     private val _uiState = MutableStateFlow(WriteReviewUIState())
     val uiState = _uiState.asStateFlow()
 
     fun onSendClicked() {
         viewModelScope.launch(Dispatchers.IO) {
             sendReviewUseCase(
-                productID = "",
+                productID = productID,
                 review = uiState.value.review,
-                rating = uiState.value.rating
+                rating = uiState.value.rating.toFloat()
             ).onResponse(
                 onLoading = {
                     _uiState.update { it.copy(isButtonLoading = true) }
@@ -33,17 +36,30 @@ class WriteReviewViewModel @Inject constructor(
                     _uiState.update { it.copy(isButtonLoading = false) }
                 },
                 onSuccess = {
-                    _uiState.update { it.copy(isButtonLoading = false) }
+                    _uiState.update { it.copy(isButtonLoading = false, isReviewDone = true) }
                 }
             )
         }
+    }
+
+    fun setProductID(id: String) {
+        productID = id
+        Log.d("````TAG````", "setProductID: $productID")
     }
 
     fun onReviewMsgChanged(newValue: String) {
         _uiState.update { it.copy(review = newValue) }
     }
 
-    fun onRatingChanged(newValue: Float) {
-        _uiState.update { it.copy(rating = newValue) }
+    fun onRatingChanged(newValue: String) {
+        if (newValue.length < 2) {
+            if (newValue.isNotEmpty()) {
+                if (newValue.toInt() < 6) {
+                    _uiState.update { it.copy(rating = newValue) }
+                }
+            } else {
+                _uiState.update { it.copy(rating = newValue) }
+            }
+        }
     }
 }

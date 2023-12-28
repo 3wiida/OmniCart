@@ -55,17 +55,18 @@ import com.mahmoudibrahem.omnicart.presentation.components.RatingBar
 @Composable
 fun AllReviewsScreen(
     viewModel: AllReviewsViewModel = hiltViewModel(),
+    productID: String = "",
     owner: LifecycleOwner = LocalLifecycleOwner.current,
     reviews: List<Review> = emptyList(),
     onBackPressed: () -> Unit = {},
-    onWriteReviewClicked: () -> Unit = {}
+    onNavigateToWriteReview: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     AllReviewsScreenContent(
         uiState = uiState,
         onBackPressed = onBackPressed,
         onFilterChanged = viewModel::onFilterClicked,
-        onWriteReviewClicked = onWriteReviewClicked
+        onWriteReviewClicked = { onNavigateToWriteReview(productID) }
     )
     DisposableEffect(key1 = owner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -233,8 +234,7 @@ private fun ReviewsSection(
 ) {
     LazyColumn(
         modifier = Modifier
-            .padding(vertical = 20.dp, horizontal = 16.dp)
-            .animateContentSize(),
+            .padding(vertical = 20.dp, horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         items(count = reviews.size) { pos ->

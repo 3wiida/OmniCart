@@ -19,6 +19,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,7 +39,8 @@ fun MainTextField(
     singleLine: Boolean = true,
     imeAction: ImeAction = ImeAction.Next,
     isPassword: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    keyboardType:KeyboardType = KeyboardType.Text
 ) {
     var isFocused: Boolean by remember { mutableStateOf(false) }
     var isShowPassword: Boolean by remember { mutableStateOf(false) }
@@ -117,7 +119,7 @@ fun MainTextField(
             disabledBorderColor = MaterialTheme.colorScheme.outline,
             disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        keyboardOptions = KeyboardOptions(imeAction = imeAction),
+        keyboardOptions = KeyboardOptions(imeAction = imeAction, keyboardType = keyboardType),
         visualTransformation = visualTransformation
     )
 }

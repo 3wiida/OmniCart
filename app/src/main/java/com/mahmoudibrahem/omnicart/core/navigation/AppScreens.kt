@@ -23,6 +23,7 @@ import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SINGLE_ORDER_SCR
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SINGLE_PRODUCT_INFO_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.SUCCESS_SCREEN_ROUTE
 import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.USER_ADDRESS_SCREEN_ROUTE
+import com.mahmoudibrahem.omnicart.core.navigation.ScreenRoutes.WRITE_REVIEW_SCREEN_ROUTE
 
 sealed class AppScreens(val route: String) {
     object Login : AppScreens(route = LOGIN_SCREEN_ROUTE)
@@ -48,5 +49,6 @@ sealed class AppScreens(val route: String) {
     object EmailEnter : AppScreens(route = EMAIL_ENTER_SCREEN_ROUTE)
     object OTPEnter : AppScreens(route = OTP_ENTER_SCREEN_ROUTE)
     object ResetPassword : AppScreens(route = RESET_PASSWORD_SCREEN_ROUTE)
+    object WriteReview : AppScreens(route = WRITE_REVIEW_SCREEN_ROUTE)
 
 }

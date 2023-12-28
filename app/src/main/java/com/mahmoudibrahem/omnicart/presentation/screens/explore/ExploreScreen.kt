@@ -50,7 +50,7 @@ import com.mahmoudibrahem.omnicart.presentation.components.BottomNavigationBar
 @Composable
 fun ExploreScreen(
     viewModel: ExploreViewModel = hiltViewModel(),
-    onCategoryClicked: (String) -> Unit = {},
+    onNavigateToSingleCategory: (String) -> Unit = {},
     onNavigateToFav: () -> Unit = {},
     onNavigateToHome: () -> Unit = {},
     onNavigateToSearchResults: (String) -> Unit = {},
@@ -74,7 +74,7 @@ fun ExploreScreen(
             uiState = uiState,
             onSearchQueryChanged = viewModel::onSearchQueryChanged,
             onFavoriteClicked = onNavigateToFav,
-            onCategoryClicked = onCategoryClicked,
+            onCategoryClicked = onNavigateToSingleCategory,
             onSearchResultClicked = onNavigateToSearchResults
         )
     }

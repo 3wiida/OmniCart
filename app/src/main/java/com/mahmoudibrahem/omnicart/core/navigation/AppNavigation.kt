@@ -32,6 +32,7 @@ import com.mahmoudibrahem.omnicart.presentation.screens.single_order.SingleOrder
 import com.mahmoudibrahem.omnicart.presentation.screens.single_product.SingleProductScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.success_screen.SuccessScreen
 import com.mahmoudibrahem.omnicart.presentation.screens.user_address.UserAddressScreen
+import com.mahmoudibrahem.omnicart.presentation.screens.write_review.WriteReviewScreen
 
 @Composable
 fun AppNavigation(
@@ -227,7 +228,15 @@ fun AppNavigation(
                             query
                         )
                     )
-                }
+                },
+                onNavigateToSingleCategory = { categoryName ->
+                    navController.navigate(
+                        route = AppScreens.CategoryProducts.route.replace(
+                            "{category_name}",
+                            categoryName
+                        )
+                    )
+                },
             )
         }
 
@@ -355,15 +364,17 @@ fun AppNavigation(
                     onBackClicked = {
                         navController.popBackStack()
                     },
-                    onSearchClicked = {
-                        navController.navigate(route = AppScreens.SearchResults.route)
-                    },
                     onNavigateToAllReviews = { reviewsJson ->
                         navController.navigate(
-                            route = AppScreens.AllReviews.route.replace(
-                                "{reviews}",
-                                reviewsJson
-                            )
+                            route = AppScreens.AllReviews.route
+                                .replace(
+                                    "{reviews}",
+                                    reviewsJson
+                                )
+                                .replace(
+                                    "{productID}",
+                                    productID.toString()
+                                )
                         )
                     }
                 )
@@ -371,11 +382,37 @@ fun AppNavigation(
         }
         composable(route = AppScreens.AllReviews.route) { navBackStackEntry ->
             val reviewsListJson = navBackStackEntry.arguments?.getString("reviews")
-            if (reviewsListJson != null) {
+            val productID = navBackStackEntry.arguments?.getString("productID")
+            if (reviewsListJson != null && productID != null) {
                 val reviewsList = reviewsListJson.toReviewList()
                 AllReviewsScreen(
                     reviews = reviewsList,
-                    onBackPressed = { navController.popBackStack() }
+                    productID = productID,
+                    onBackPressed = { navController.popBackStack() },
+                    onNavigateToWriteReview = {
+                        navController.navigate(
+                            route =
+                            AppScreens.WriteReview.route.replace("{productID}", productID)
+                        )
+                    }
+                )
+            }
+        }
+
+        composable(route = AppScreens.WriteReview.route) { navBackStackEntry ->
+            val productID = navBackStackEntry.arguments?.getString("productID")
+            if (productID != null) {
+                WriteReviewScreen(
+                    productID = productID,
+                    onNavigateUp = { navController.navigateUp() },
+                    onNavigateToProduct = {
+                        navController.navigate(
+                            route = AppScreens.SingleProductInfo.route.replace(
+                                "{product_id}",
+                                productID
+                            )
+                        )
+                    },
                 )
             }
         }
@@ -555,5 +592,6 @@ fun AppNavigation(
                 )
             }
         }
+
     }
 }

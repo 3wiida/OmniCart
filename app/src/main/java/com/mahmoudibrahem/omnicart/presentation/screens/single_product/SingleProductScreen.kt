@@ -30,6 +30,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -74,20 +75,20 @@ fun SingleProductScreen(
     viewModel: SingleProductViewModel = hiltViewModel(),
     owner: LifecycleOwner = LocalLifecycleOwner.current,
     productID: String = "",
-    onSearchClicked: () -> Unit = {},
     onBackClicked: () -> Unit = {},
-    onNavigateToAllReviews: (String) -> Unit ={}
+    onNavigateToAllReviews: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     SingleProductScreenContent(
         uiState = uiState,
-        onSearchClicked = onSearchClicked,
         onBackClicked = onBackClicked,
         onLoveClicked = viewModel::onLoveClicked,
         onProductClicked = viewModel::getProductData,
         onAddToCartClicked = viewModel::onAddToCartClicked,
         onDeleteBtnClicked = viewModel::onDeleteFromCartClicked,
-        onSeeAllReviewsClicked = { onNavigateToAllReviews(uiState.productData.productInfo.reviews.toReviewJson()) }
+        onSeeAllReviewsClicked = {
+            onNavigateToAllReviews(uiState.productData.productInfo.reviews.toReviewJson())
+        }
     )
     DisposableEffect(key1 = owner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -105,7 +106,6 @@ fun SingleProductScreen(
 @Composable
 private fun SingleProductScreenContent(
     uiState: SingleProductScreenUIState,
-    onSearchClicked: () -> Unit,
     onBackClicked: () -> Unit,
     onLoveClicked: () -> Unit,
     onProductClicked: (String) -> Unit,
@@ -119,8 +119,11 @@ private fun SingleProductScreenContent(
             .padding(top = 26.dp, bottom = 32.dp),
     ) {
         ScreenHeader(
-            onSearchClicked = onSearchClicked,
             onBackClicked = onBackClicked
+        )
+        Divider(
+            modifier = Modifier.padding(top = 8.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
         )
         AnimatedVisibility(
             visible = uiState.isLoading,
@@ -165,43 +168,27 @@ private fun SingleProductScreenContent(
 
 @Composable
 private fun ScreenHeader(
-    onSearchClicked: () -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onBackClicked
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.back_icon),
-                    contentDescription = "",
-                    tint = Color.Unspecified
-                )
-            }
-            Text(
-                text = stringResource(R.string.product_information),
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
         IconButton(
-            onClick = onSearchClicked
+            onClick = onBackClicked
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.search_icon),
+                painter = painterResource(id = R.drawable.back_icon),
                 contentDescription = "",
                 tint = Color.Unspecified
             )
         }
+        Text(
+            text = stringResource(R.string.product_information),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.titleMedium,
+        )
     }
 }
 
@@ -567,7 +554,7 @@ fun RecommendedProduct(
 @Composable
 private fun LoadingSection() {
     Column(
-        Modifier.padding(horizontal = 16.dp)
+        Modifier.padding(horizontal = 16.dp, vertical = 26.dp)
     ) {
         //image
         Spacer(
