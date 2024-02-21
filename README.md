@@ -3,6 +3,15 @@
 
 Omni Cart is an E-Commerce android application that has the most features required in the e-commerce process.
 
+Available on MediaFire Store and soon also on Google Play.
+
+<a href="https://www.mediafire.com/file/zy7copdonxraghf/Omni_Cart.apk/file">
+  <img
+    alt="Get it on MediaFire"
+    height="80"
+    src="https://logos-download.com/wp-content/uploads/2019/11/Mediafire_Logo-700x188.png"/>
+</a>
+
 ## Screenshots
 
 <div>
