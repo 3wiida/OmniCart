@@ -1,7 +1,10 @@
 package com.mahmoudibrahem.omnicart.presentation.screens.all_reviews
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +27,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -47,6 +51,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mahmoudibrahem.omnicart.R
 import com.mahmoudibrahem.omnicart.domain.model.Review
 import com.mahmoudibrahem.omnicart.presentation.components.MainButton
@@ -105,9 +113,22 @@ private fun AllReviewsScreenContent(
                 FilterSection(
                     onFilterChanged = onFilterChanged
                 )
-                ReviewsSection(
-                    reviews = uiState.reviews
-                )
+                AnimatedVisibility(
+                    visible = uiState.reviews.isEmpty() && !uiState.isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    EmptyState()
+                }
+                AnimatedVisibility(
+                    visible = uiState.reviews.isNotEmpty() && !uiState.isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    ReviewsSection(
+                        reviews = uiState.reviews
+                    )
+                }
             }
             MainButton(
                 modifier = Modifier
@@ -251,7 +272,15 @@ private fun SingleReviewSection(
     review: Review
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(5.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .padding(16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -286,6 +315,41 @@ private fun SingleReviewSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall
         )
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val composition by rememberLottieComposition(
+                LottieCompositionSpec.RawRes(R.raw.no_feedback_anim)
+            )
+            LottieAnimation(
+                modifier = Modifier.size(250.dp),
+                composition = composition,
+                iterations = LottieConstants.IterateForever
+            )
+            Text(
+                modifier = Modifier.padding(top = 16.dp),
+                text = "No Feedback Found",
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = "Feedbacks from users will be shown here",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
 }
 

@@ -7,6 +7,7 @@ import com.mahmoudibrahem.omnicart.core.util.Constants.IS_LOGGED_IN_KEY
 import com.mahmoudibrahem.omnicart.core.util.Constants.TAG
 import com.mahmoudibrahem.omnicart.core.util.Constants.USER_TOKEN_KEY
 import com.mahmoudibrahem.omnicart.domain.usecase.GetFromDataStoreUseCase
+import com.stripe.android.PaymentConfiguration
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +32,10 @@ class OmniCartApplication : Application() {
             Constants.userToken = userToken
             Log.d(TAG, "onCreate: ${Constants.userToken}")
         }
+        PaymentConfiguration.init(
+            applicationContext,
+            "pk_test_51Ndu2dFAivaG0tEbtFs71hgCXj6SZGVLntuYKWYrtZLCDipciwvTc3rQWz5ftH77MDwGoU5bDOq3IojgWRh9BvVb00E8DGww5D"
+        )
     }
 
     override fun onLowMemory() {

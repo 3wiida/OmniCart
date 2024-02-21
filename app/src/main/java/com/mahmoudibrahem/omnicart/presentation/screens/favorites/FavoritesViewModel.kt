@@ -22,10 +22,6 @@ class FavoritesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(FavoritesScreenUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        getWishlist()
-    }
-
     fun onLoveClicked(
         productID: String
     ) {
@@ -43,7 +39,7 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    private fun getWishlist() {
+     fun getWishlist() {
         viewModelScope.launch(Dispatchers.IO) {
             getWishlistUseCase()
                 .onResponse(

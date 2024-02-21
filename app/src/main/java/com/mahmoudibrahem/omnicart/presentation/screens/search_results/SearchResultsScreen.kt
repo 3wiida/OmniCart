@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,6 +70,7 @@ import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.presentation.components.MainButton
 import com.mahmoudibrahem.omnicart.presentation.components.MainTextField
 import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
+import com.mahmoudibrahem.omnicart.presentation.components.RatingBar
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
 
 @Composable
@@ -161,22 +164,22 @@ private fun SearchResultsScreenContent(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
         AnimatedVisibility(
-            visible = uiState.isLoading,
+            visible = uiState.isLoading && uiState.searchQuery.isNotEmpty(),
             enter = fadeIn(),
-            exit = fadeOut(animationSpec = tween(durationMillis = 500))
+            exit = fadeOut()
         ) {
             LoadingState()
         }
         AnimatedVisibility(
-            visible = !uiState.isLoading && uiState.resultsList.isEmpty(),
-            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+            visible = !uiState.isLoading && uiState.resultsList.isEmpty() && uiState.searchQuery.isNotEmpty(),
+            enter = fadeIn(),
             exit = fadeOut()
         ) {
             EmptyState()
         }
         AnimatedVisibility(
             visible = !uiState.isLoading && uiState.resultsList.isNotEmpty(),
-            enter = fadeIn(animationSpec = tween(delayMillis = 500)),
+            enter = fadeIn(),
             exit = fadeOut()
         ) {
             ResultsSection(
@@ -283,7 +286,7 @@ private fun LoadingState() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(count = 3) {
+            items(count = 4) {
                 Column(
                     modifier = Modifier.padding(end = 12.dp)
                 ) {
@@ -329,7 +332,8 @@ private fun SingleProductItem(
 ) {
     Column(
         modifier = modifier
-            .size(width = 156.dp, height = 230.dp)
+            .width(156.dp)
+            .fillMaxHeight()
             .clip(RoundedCornerShape(5.dp))
             .border(
                 width = 1.dp,
@@ -350,56 +354,59 @@ private fun SingleProductItem(
         ) {
             NetworkImage(
                 modifier = Modifier
-                    .size(110.dp)
+                    .fillMaxWidth()
+                    .height(110.dp)
                     .clip(RoundedCornerShape(5.dp)),
                 model = product.image,
                 contentScale = ContentScale.FillBounds
             )
         }
         Text(
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = 8.dp),
             text = product.name,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.labelSmall,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2
+            maxLines = 1
         )
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomStart
-        ) {
-            Column {
+
+        RatingBar(
+            modifier = Modifier.padding(top = 4.dp),
+            rating = product.rating,
+            spaceBetween = 2.dp
+        )
+
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = if (product.discount == null)
+                "${product.price}$"
+            else
+                "${product.discount}$",
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelSmall,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (product.discount != null) {
+            Row(
+                modifier = Modifier.padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    modifier = Modifier.padding(top = 4.dp),
-                    text = if (product.discount == null)
-                        "${product.price}$"
-                    else
-                        "${product.discount}$",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelSmall,
+                    text = product.price.toString() + "$",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleSmall,
                     overflow = TextOverflow.Ellipsis,
+                    textDecoration = TextDecoration.LineThrough
                 )
-                if (product.discount != null) {
-                    Row(
-                        modifier = Modifier.padding(top = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = product.price.toString() + "$",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.titleSmall,
-                            overflow = TextOverflow.Ellipsis,
-                            textDecoration = TextDecoration.LineThrough
-                        )
-                        Text(
-                            text = "  ${product.disPercentage.toString()}% Off",
-                            color = MaterialTheme.colorScheme.secondary,
-                            style = MaterialTheme.typography.labelSmall,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
+                Text(
+                    text = "  ${product.disPercentage.toString()}% Off",
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.labelSmall,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
+        } else {
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

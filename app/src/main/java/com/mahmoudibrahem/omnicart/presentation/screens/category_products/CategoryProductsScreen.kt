@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -52,6 +54,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.mahmoudibrahem.omnicart.R
 import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
+import com.mahmoudibrahem.omnicart.presentation.components.RatingBar
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
 
 @Composable
@@ -93,7 +96,7 @@ private fun CategoryProductsScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 26.dp, bottom = 68.dp)
+                .padding(top = 26.dp, bottom = 26.dp)
         ) {
             ScreenHeader(
                 categoryName = categoryName,
@@ -174,7 +177,8 @@ private fun ProductItem(
 ) {
     Column(
         modifier = Modifier
-            .size(width = 156.dp, height = 230.dp)
+            .width(156.dp)
+            .fillMaxHeight()
             .clip(RoundedCornerShape(5.dp))
             .border(
                 width = 1.dp,
@@ -203,49 +207,51 @@ private fun ProductItem(
             )
         }
         Text(
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = 8.dp),
             text = product.name,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.labelSmall,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2
+            maxLines = 1
         )
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomStart
-        ) {
-            Column {
+
+        RatingBar(
+            modifier = Modifier.padding(top = 4.dp),
+            rating = product.rating,
+            spaceBetween = 2.dp
+        )
+
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = if (product.discount == null)
+                "${product.price}$"
+            else
+                "${product.discount}$",
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelSmall,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (product.discount != null) {
+            Row(
+                modifier = Modifier.padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    modifier = Modifier.padding(top = 4.dp),
-                    text = if (product.discount == null)
-                        "${product.price}$"
-                    else
-                        "${product.discount}$",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelSmall,
+                    text = product.price.toString() + "$",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleSmall,
                     overflow = TextOverflow.Ellipsis,
+                    textDecoration = TextDecoration.LineThrough
                 )
-                if (product.discount != null) {
-                    Row(
-                        modifier = Modifier.padding(top = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = product.price.toString() + "$",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.titleSmall,
-                            overflow = TextOverflow.Ellipsis,
-                            textDecoration = TextDecoration.LineThrough
-                        )
-                        Text(
-                            text = "  ${product.disPercentage.toString()}% Off",
-                            color = MaterialTheme.colorScheme.secondary,
-                            style = MaterialTheme.typography.labelSmall,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
+                Text(
+                    text = "  ${product.disPercentage.toString()}% Off",
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.labelSmall,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
+        }else{
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

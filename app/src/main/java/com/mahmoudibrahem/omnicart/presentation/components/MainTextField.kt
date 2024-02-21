@@ -7,6 +7,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -111,13 +112,14 @@ fun MainTextField(
                 style = MaterialTheme.typography.bodySmall
             )
         },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            errorBorderColor = MaterialTheme.colorScheme.secondary,
+        colors = OutlinedTextFieldDefaults.colors(
+            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
             disabledBorderColor = MaterialTheme.colorScheme.outline,
-            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+            errorBorderColor = MaterialTheme.colorScheme.secondary,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground
         ),
         keyboardOptions = KeyboardOptions(imeAction = imeAction, keyboardType = keyboardType),
         visualTransformation = visualTransformation

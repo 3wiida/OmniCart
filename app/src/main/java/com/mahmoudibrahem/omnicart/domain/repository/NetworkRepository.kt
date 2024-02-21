@@ -6,6 +6,7 @@ import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.domain.model.HomeResponse
 import com.mahmoudibrahem.omnicart.domain.model.LoginResponse
 import com.mahmoudibrahem.omnicart.domain.model.Order
+import com.mahmoudibrahem.omnicart.domain.model.PaymentInfo
 import com.mahmoudibrahem.omnicart.domain.model.ProductData
 import com.mahmoudibrahem.omnicart.domain.model.RegisterResponse
 import com.mahmoudibrahem.omnicart.domain.model.SingleOrder
@@ -83,4 +84,6 @@ interface NetworkRepository {
         password: String,
         confirmPassword: String
     ): Flow<Resource<Unit>>
+
+    suspend fun getPaymentInfo():Flow<Resource<PaymentInfo>>
 }

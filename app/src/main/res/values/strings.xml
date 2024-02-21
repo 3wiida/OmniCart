@@ -112,4 +112,9 @@
     <string name="enter_your_email">Enter Your Email</string>
     <string name="write_your_review">Write Your Review</string>
     <string name="write_your_review_here">Write your review here</string>
+    <string name="logout">Logout</string>
+    <string name="are_you_sure_you_want_to_logout">Are you sure you want to logout ?</string>
+    <string name="cancel">Cancel</string>
+    <string name="write_a_review">" (Write a Review)"</string>
+    <string name="no_reviews_found_for_this_product">No reviews found for this product!</string>
 </resources>

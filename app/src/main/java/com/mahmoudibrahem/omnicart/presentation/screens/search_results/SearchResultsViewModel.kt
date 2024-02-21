@@ -64,6 +64,7 @@ class SearchResultsViewModel @Inject constructor(
     }
 
     private fun searchForProduct() {
+        _uiState.update { it.copy(isLoading = true) }
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
             delay(500)

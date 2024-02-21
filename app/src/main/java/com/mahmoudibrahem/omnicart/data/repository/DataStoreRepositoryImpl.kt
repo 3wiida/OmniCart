@@ -31,4 +31,9 @@ class DataStoreRepositoryImpl @Inject constructor(
             .firstOrNull()
     }
 
+    override suspend fun <T> deleteFromDataStore(key: Preferences.Key<T>) {
+        dataStore.edit {
+            it.remove(key)
+        }
+    }
 }

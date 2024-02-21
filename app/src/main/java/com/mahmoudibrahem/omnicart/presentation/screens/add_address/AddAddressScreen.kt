@@ -15,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,6 +48,12 @@ fun AddAddressScreen(
         onPhoneNumberChanged = viewModel::onPhoneNumberChanged,
         onAddAddressClicked = viewModel::addAddress
     )
+
+    LaunchedEffect(key1 = uiState.isAdditionSuccess) {
+        if (uiState.isAdditionSuccess) {
+            onNavigateBack()
+        }
+    }
 }
 
 @Composable

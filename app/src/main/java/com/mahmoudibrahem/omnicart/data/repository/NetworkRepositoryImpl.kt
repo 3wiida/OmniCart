@@ -9,6 +9,7 @@ import com.mahmoudibrahem.omnicart.domain.model.CommonProduct
 import com.mahmoudibrahem.omnicart.domain.model.HomeResponse
 import com.mahmoudibrahem.omnicart.domain.model.LoginResponse
 import com.mahmoudibrahem.omnicart.domain.model.Order
+import com.mahmoudibrahem.omnicart.domain.model.PaymentInfo
 import com.mahmoudibrahem.omnicart.domain.model.ProductData
 import com.mahmoudibrahem.omnicart.domain.model.RegisterResponse
 import com.mahmoudibrahem.omnicart.domain.model.SingleOrder
@@ -439,6 +440,24 @@ class NetworkRepositoryImpl @Inject constructor(
             } catch (e: IOException) {
                 emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
             } catch (e: Exception) {
+                emit(Resource.Failure(message = "Unknown error happened, try again later"))
+            }
+        }
+    }
+
+    override suspend fun getPaymentInfo(): Flow<Resource<PaymentInfo>> {
+        return flow {
+            emit(Resource.Loading())
+            try {
+                val response = api.getPaymentInfo()
+                emit(Resource.Success(data = response.toPaymentInfo()))
+            } catch (e: HttpException) {
+                val error = e.parseToErrorModel()
+                emit(Resource.Failure(message = error.message))
+            } catch (e: IOException) {
+                emit(Resource.Failure(message = "Can't reach server, check your internet connection"))
+            } catch (e: Exception) {
+                Log.d("````TAG````", "getPaymentInfo: $e")
                 emit(Resource.Failure(message = "Unknown error happened, try again later"))
             }
         }

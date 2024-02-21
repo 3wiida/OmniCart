@@ -37,7 +37,8 @@ class AllReviewsViewModel @Inject constructor() : ViewModel() {
 
     fun setReviewsList(list: List<Review>) {
         reviewsList = list
-        _uiState.update { it.copy(totalReviews = reviewsList.size) }
+        _uiState.update { it.copy(totalReviews = reviewsList.size, isLoading = false) }
+
         onFilterClicked(0)
     }
 

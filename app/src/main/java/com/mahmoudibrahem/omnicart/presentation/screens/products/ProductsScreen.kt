@@ -171,7 +171,7 @@ private fun ProductItem(
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.labelSmall,
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2
+            maxLines = 1
         )
 
         RatingBar(

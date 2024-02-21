@@ -1,5 +1,7 @@
 package com.mahmoudibrahem.omnicart.core.navigation
 
+import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -37,7 +39,7 @@ import com.mahmoudibrahem.omnicart.presentation.screens.write_review.WriteReview
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    startDestination: String,
+    startDestination: String
 ) {
     NavHost(
         navController = navController,
@@ -376,6 +378,15 @@ fun AppNavigation(
                                     productID.toString()
                                 )
                         )
+                    },
+                    onNavigateToWriteReview = {
+                        navController.navigate(
+                            route =
+                            AppScreens.WriteReview.route.replace(
+                                "{productID}",
+                                productID.toString()
+                            )
+                        )
                     }
                 )
             }
@@ -411,7 +422,9 @@ fun AppNavigation(
                                 "{product_id}",
                                 productID
                             )
-                        )
+                        ) {
+                            this.popUpTo(route = AppScreens.SingleProductInfo.route)
+                        }
                     },
                 )
             }
@@ -548,7 +561,14 @@ fun AppNavigation(
 
         composable(route = AppScreens.Profile.route) {
             ProfileScreen(
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                onNavigateToLogin = {
+                    navController.navigate(route = AppScreens.Login.route) {
+                        popUpTo(route = AppScreens.Home.route) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
 

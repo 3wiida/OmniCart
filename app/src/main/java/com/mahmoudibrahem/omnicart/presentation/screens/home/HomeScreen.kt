@@ -60,12 +60,15 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import com.mahmoudibrahem.omnicart.core.util.Converters.toStringJson
 import com.mahmoudibrahem.omnicart.presentation.components.NetworkImage
+import com.mahmoudibrahem.omnicart.presentation.components.RatingBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -281,11 +284,17 @@ private fun HomeScreenBody(
             onProductClicked = onProductClicked,
             onSeeMoreClicked = onSeeMoreClicked
         )
-        RecommendedSection(
-            recommendedProducts = recommendedProducts,
-            onProductClicked = onProductClicked,
-            onSeeMoreClicked = onSeeMoreClicked
-        )
+        AnimatedVisibility(
+            visible = !isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            RecommendedSection(
+                recommendedProducts = recommendedProducts,
+                onProductClicked = onProductClicked,
+                onSeeMoreClicked = onSeeMoreClicked
+            )
+        }
     }
 }
 
@@ -531,7 +540,7 @@ private fun RecommendedSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items = recommendedProducts.take(10)) { product ->
-                ProductItem(
+                RecommendedProductItem(
                     product = product,
                     onProductClicked = onProductClicked
                 )
@@ -745,6 +754,92 @@ private fun ProductItem(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RecommendedProductItem(
+    product: CommonProduct,
+    onProductClicked: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(156.dp)
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(5.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .padding(16.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                onProductClicked(product.id)
+            },
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            NetworkImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .clip(RoundedCornerShape(5.dp)),
+                model = product.image,
+                contentScale = ContentScale.FillBounds
+            )
+        }
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = product.name,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.labelSmall,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
+        )
+
+        RatingBar(
+            modifier = Modifier.padding(top = 4.dp),
+            rating = product.rating,
+            spaceBetween = 2.dp
+        )
+
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = if (product.discount == null)
+                "${product.price}$"
+            else
+                "${product.discount}$",
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelSmall,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (product.discount != null) {
+            Row(
+                modifier = Modifier.padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = product.price.toString() + "$",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleSmall,
+                    overflow = TextOverflow.Ellipsis,
+                    textDecoration = TextDecoration.LineThrough
+                )
+                Text(
+                    text = "  ${product.disPercentage.toString()}% Off",
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.labelSmall,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }else{
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

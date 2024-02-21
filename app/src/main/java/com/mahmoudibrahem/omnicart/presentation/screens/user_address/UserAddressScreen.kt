@@ -1,5 +1,9 @@
 package com.mahmoudibrahem.omnicart.presentation.screens.user_address
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,34 +27,50 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mahmoudibrahem.omnicart.R
 import com.mahmoudibrahem.omnicart.domain.model.UserAddress
+import com.mahmoudibrahem.omnicart.presentation.MainActivity
+import com.mahmoudibrahem.omnicart.presentation.MainActivity.Companion.paymentProcessState
 import com.mahmoudibrahem.omnicart.presentation.components.MainButton
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.view.CardInputWidget
+import kotlinx.coroutines.delay
 
 @Composable
 fun UserAddressScreen(
@@ -61,19 +81,58 @@ fun UserAddressScreen(
     onNavigateToSuccessScreen: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val owner: LifecycleOwner = LocalLifecycleOwner.current
+    var isShowPaymentSheet by remember { mutableStateOf(false) }
+
     UserAddressScreenContent(
         uiState = uiState,
         isFromCart = isFromCart,
         isButtonLoading = uiState.isButtonLoading,
         onAddressSelected = viewModel::onAddressSelected,
         onBackClicked = onBackClicked,
-        onButtonClicked = if (isFromCart) viewModel::completeOrder else onNavigateToAddAddress,
-        onAddAddressClicked = onNavigateToAddAddress
+        onAddAddressClicked = onNavigateToAddAddress,
+        onButtonClicked = {
+            if (isFromCart) {
+                viewModel.getPaymentInfo()
+                isShowPaymentSheet = true
+            } else {
+                onNavigateToAddAddress()
+            }
+        }
     )
+
+
     LaunchedEffect(key1 = uiState.isOrderCompleted) {
-        if(uiState.isOrderCompleted){
+        if (uiState.isOrderCompleted) {
+            delay(500L)
             onNavigateToSuccessScreen()
         }
+    }
+
+    LaunchedEffect(key1 = paymentProcessState) {
+        if (paymentProcessState.value == MainActivity.Companion.PaymentState.Success) {
+            isShowPaymentSheet = false
+        }
+    }
+
+    DisposableEffect(key1 = owner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_CREATE) {
+                viewModel.getUserAddress()
+            }
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose {
+            owner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    if (isShowPaymentSheet && uiState.paymentInfo != null) {
+        PaymentBottomSheet(
+            totalPrice = uiState.paymentInfo!!.amount,
+            onPayClicked = viewModel::onPaymentConfirmed,
+            onDismiss = { isShowPaymentSheet = false }
+        )
     }
 }
 
@@ -220,6 +279,9 @@ private fun AddressSection(
                 index = index,
                 onAddressSelected = { onAddressSelected(index) }
             )
+        }
+        item {
+            Spacer(modifier = Modifier.height(54.dp))
         }
     }
 }
@@ -416,8 +478,61 @@ private fun EmptyState(
     }
 }
 
-@Preview
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserAddressScreenPreview() {
-    UserAddressScreen()
+fun PaymentBottomSheet(
+    totalPrice: Double,
+    onPayClicked: (PaymentMethodCreateParams) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var cardInputWidget: CardInputWidget? by remember { mutableStateOf(null) }
+    val paymentState = paymentProcessState.collectAsState()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 28.dp, start = 16.dp, end = 16.dp)
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .fillMaxWidth(),
+                text = "Complete Your Order",
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = "Enter your payment details",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+            AndroidView(
+                factory = { context ->
+                    cardInputWidget = CardInputWidget(context)
+                    return@AndroidView cardInputWidget!!
+                }
+            )
+            MainButton(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .fillMaxWidth()
+                    .height(52.dp),
+                text = "Pay $totalPrice$",
+                isLoading = paymentState.value == MainActivity.Companion.PaymentState.Loading,
+                isEnabled = paymentState.value != MainActivity.Companion.PaymentState.Loading,
+                onClick = {
+                    paymentProcessState.value = MainActivity.Companion.PaymentState.Loading
+                    cardInputWidget?.paymentMethodCreateParams?.let {
+                        onPayClicked(it)
+                    }
+                }
+            )
+        }
+
+        if (paymentState.value == MainActivity.Companion.PaymentState.Success) onDismiss()
+    }
 }

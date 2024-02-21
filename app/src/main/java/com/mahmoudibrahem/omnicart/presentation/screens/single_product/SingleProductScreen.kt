@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -76,7 +77,8 @@ fun SingleProductScreen(
     owner: LifecycleOwner = LocalLifecycleOwner.current,
     productID: String = "",
     onBackClicked: () -> Unit = {},
-    onNavigateToAllReviews: (String) -> Unit = {}
+    onNavigateToAllReviews: (String) -> Unit = {},
+    onNavigateToWriteReview: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     SingleProductScreenContent(
@@ -88,7 +90,9 @@ fun SingleProductScreen(
         onDeleteBtnClicked = viewModel::onDeleteFromCartClicked,
         onSeeAllReviewsClicked = {
             onNavigateToAllReviews(uiState.productData.productInfo.reviews.toReviewJson())
-        }
+        },
+        onWriteReviewClicked = onNavigateToWriteReview
+
     )
     DisposableEffect(key1 = owner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -111,7 +115,8 @@ private fun SingleProductScreenContent(
     onProductClicked: (String) -> Unit,
     onAddToCartClicked: () -> Unit,
     onDeleteBtnClicked: () -> Unit,
-    onSeeAllReviewsClicked: () -> Unit
+    onSeeAllReviewsClicked: () -> Unit,
+    onWriteReviewClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -158,7 +163,8 @@ private fun SingleProductScreenContent(
                         onProductClicked = onProductClicked,
                         onAddToCartClicked = onAddToCartClicked,
                         onDeleteBtnClicked = onDeleteBtnClicked,
-                        onSeeAllReviewsClicked = onSeeAllReviewsClicked
+                        onSeeAllReviewsClicked = onSeeAllReviewsClicked,
+                        onWriteReviewClicked = onWriteReviewClicked
                     )
                 }
             }
@@ -211,7 +217,7 @@ private fun ProductImagesSection(
             NetworkImage(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(238.dp),
+                    .aspectRatio(1.5f),
                 model = images[pos],
                 contentScale = ContentScale.FillBounds
             )
@@ -238,7 +244,8 @@ private fun ProductSpecSection(
     onLoveClicked: () -> Unit,
     onAddToCartClicked: () -> Unit,
     onDeleteBtnClicked: () -> Unit,
-    onSeeAllReviewsClicked: () -> Unit
+    onSeeAllReviewsClicked: () -> Unit,
+    onWriteReviewClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -343,18 +350,19 @@ private fun ProductSpecSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall
         )
-        if (productInfo.reviews.isNotEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    modifier = Modifier.padding(top = 24.dp, bottom = 12.dp),
-                    text = stringResource(R.string.reviews),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.labelMedium
-                )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier.padding(top = 24.dp, bottom = 12.dp),
+                text = stringResource(R.string.reviews),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.labelMedium
+            )
+            if (productInfo.reviews.isNotEmpty()) {
                 ClickableText(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
@@ -365,10 +373,32 @@ private fun ProductSpecSection(
                     onClick = { onSeeAllReviewsClicked() }
                 )
             }
+        }
+        if (productInfo.reviews.isNotEmpty()) {
             SingleReviewSection(
                 modifier = Modifier.padding(vertical = 8.dp),
                 review = productInfo.reviews.last()
             )
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.no_reviews_found_for_this_product),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                ClickableText(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                            append(stringResource(R.string.write_a_review))
+                        }
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    onClick = { onWriteReviewClicked() }
+                )
+            }
         }
 
         Text(

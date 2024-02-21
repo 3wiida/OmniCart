@@ -46,16 +46,16 @@ class LoginViewModel @Inject constructor(
                         saveInDataStoreUseCase(key = USER_TOKEN_KEY, value = response!!.token)
                         saveInDataStoreUseCase(key = IS_LOGGED_IN_KEY, value = true)
                     }
-                    _uiState.update { it.copy(isLoading = false, isLoginSuccessful = true) }
+                    _uiState.update { it.copy(isLoading = false, isLoginSuccessful = true, isError = false) }
                     userToken = response!!.token
                     Log.d(TAG, "onLoginButtonClicked: $response")
                 },
                 onFailure = { msg ->
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(isLoading = false, isError = true) }
                     Log.d(TAG, "onLoginButtonClicked: $msg")
                 },
                 onLoading = {
-                    _uiState.update { it.copy(isLoading = true) }
+                    _uiState.update { it.copy(isLoading = true, isError = false) }
                     Log.d(TAG, "onLoginButtonClicked: Loading")
                 }
             )

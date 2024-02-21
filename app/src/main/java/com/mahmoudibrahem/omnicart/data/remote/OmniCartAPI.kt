@@ -8,6 +8,7 @@ import com.mahmoudibrahem.omnicart.data.remote.dto.MeResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.OTPResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.OfferResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.OrdersResponseDto
+import com.mahmoudibrahem.omnicart.data.remote.dto.PaymentInfoDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.ProductInfoDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.RegisterResponseDto
 import com.mahmoudibrahem.omnicart.data.remote.dto.SearchResponseDto
@@ -132,4 +133,7 @@ interface OmniCartAPI {
         @Query("password") password: String,
         @Query("confirmPassword") confirmPassword: String
     )
+
+    @POST("payment-sheet")
+    suspend fun getPaymentInfo(): PaymentInfoDto
 }

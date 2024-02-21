@@ -6,7 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,14 +22,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,37 +44,55 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mahmoudibrahem.omnicart.R
 import com.mahmoudibrahem.omnicart.domain.model.User
+import com.mahmoudibrahem.omnicart.presentation.components.MainButton
 import com.mahmoudibrahem.omnicart.presentation.components.shimmerBrush
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
-    onNavigateUp: () -> Unit = {}
+    onNavigateUp: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scope: CoroutineScope = rememberCoroutineScope()
     ProfileScreenContent(
         uiState = uiState,
-        onBackClicked = onNavigateUp
+        onBackClicked = onNavigateUp,
+        onLogoutClicked = {
+            viewModel.logout()
+            scope.launch {
+                delay(500)
+                onNavigateToLogin()
+            }
+        }
     )
 }
 
 @Composable
 private fun ProfileScreenContent(
     uiState: ProfileScreenUIState,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onLogoutClicked: () -> Unit
 ) {
+    var isShowLogoutDialog by remember { mutableStateOf(false) }
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
         Column(
             Modifier
-                .fillMaxSize()
-                .padding(vertical = 26.dp)
+                .fillMaxWidth()
+                .padding(top = 24.dp)
         ) {
             ScreenHeader(
                 onBackClicked = onBackClicked
@@ -81,25 +108,56 @@ private fun ProfileScreenContent(
             ) {
                 LoadingState()
             }
+
             AnimatedVisibility(
                 visible = !uiState.isLoading,
                 enter = fadeIn(animationSpec = tween(delayMillis = 500)),
                 exit = fadeOut()
             ) {
-                Column(
-                    Modifier.padding(vertical = 24.dp, horizontal = 16.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 26.dp)
                 ) {
-                    uiState.me?.let { info ->
-                        MainInfoSection(
-                            name = info.name,
-                            id = info.id
-                        )
-                        SecondaryInfoSection(
-                            info = info
-                        )
+                    Column(
+                        Modifier
+                            .padding(horizontal = 16.dp)
+                            .align(Alignment.TopCenter)
+                    ) {
+                        uiState.me?.let { info ->
+                            MainInfoSection(
+                                name = info.name,
+                                id = info.id
+                            )
+                            SecondaryInfoSection(
+                                info = info
+                            )
+                        }
                     }
+                    MainButton(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .align(Alignment.BottomCenter),
+                        text = stringResource(R.string.logout),
+                        activeColor = MaterialTheme.colorScheme.secondary,
+                        inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                        onClick = { isShowLogoutDialog = true }
+                    )
                 }
             }
+        }
+
+        AnimatedVisibility(
+            visible = isShowLogoutDialog,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            LogoutDialog(
+                onDismiss = { isShowLogoutDialog = false },
+                onLogoutClicked = onLogoutClicked
+            )
         }
     }
 }
@@ -237,6 +295,85 @@ private fun InfoItem(
             style = MaterialTheme.typography.bodySmall
         )
 
+    }
+}
+
+@Composable
+private fun LogoutDialog(
+    onDismiss: () -> Unit,
+    onLogoutClicked: () -> Unit
+) {
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 26.dp, start = 16.dp, end = 16.dp, bottom = 32.dp),
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    text = stringResource(R.string.logout),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    modifier = Modifier.padding(bottom = 24.dp),
+                    text = stringResource(R.string.are_you_sure_you_want_to_logout),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    MainButton(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .weight(1f)
+                            .height(48.dp),
+                        text = stringResource(R.string.logout),
+                        activeColor = MaterialTheme.colorScheme.secondary,
+                        inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                        onClick = {
+                            onLogoutClicked()
+                            onDismiss()
+                        }
+                    )
+                    TextButton(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .weight(1f)
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.secondary,
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                            .background(MaterialTheme.colorScheme.surface),
+                        onClick = onDismiss
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            color = MaterialTheme.colorScheme.secondary,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -94,7 +94,8 @@ data class HomeResponseDto(
             price = price,
             discount = discount,
             disPercentage = disPercentage,
-            id = _id
+            id = _id,
+            rating = ratingAverage.toFloat()
         )
     }
 
@@ -106,7 +107,8 @@ data class HomeResponseDto(
             price = price,
             discount = discount,
             disPercentage = disPercentage,
-            id = _id
+            id = _id,
+            rating = ratingAverage.toFloat()
         )
     }
 
@@ -118,7 +120,8 @@ data class HomeResponseDto(
             price = price,
             discount = discount,
             disPercentage = disPercentage,
-            id = _id
+            id = _id,
+            rating = ratingAverage
         )
     }
 }
