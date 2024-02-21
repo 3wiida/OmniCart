@@ -1,16 +1,7 @@
 # Omni Cart
 <img src="assets/icon.webp" align="left" width="180" hspace="10" vspace="10" />
 
-Omni Cart is an E-Commerce android application that has the most features requried in e-commerce process.
-
-you can get it from MediaFire.
-
-<a href="https://www.mediafire.com/file/v42vxnrtg85f336/OmniCart.apk/file">
-  <img
-    alt="Get it on MediaFire"
-    height="80"
-    src="https://logos-download.com/wp-content/uploads/2019/11/Mediafire_Logo-700x188.png"/>
-</a>
+Omni Cart is an E-Commerce android application that has the most features required in the e-commerce process.
 
 ## Screenshots
 
@@ -42,13 +33,14 @@ you can get it from MediaFire.
 
 - Full authentication system (login - register - forgot password).
 - Display all types of products and categories in an easy way.
-- Search for a patricular product (sort and filter included).
+- Search for a particular product (sort and filter included).
 - Favorites feature.
 - Recommendation system.
 - Cart and checkout process.
-- See what if there are offers now in offers screen.
+- See what if there are offers now in the offers screen.
 - Track your orders and get a log of the orders you made before.
-- Ability to add multible address and ship to one of them when checkout.
+- Ability to add multiple addresses and ship to one of them when checkout.
+- Payment Process
 
 ## Find this repository useful? :heart:
 Support it by putting a star for this repository. :star: <br>
